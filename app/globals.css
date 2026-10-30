@@ -1,0 +1,136 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f8f7f0;
+  --secondary-bg: #bfe3dc;
+  --section-bg: #e8f5f2;
+  --heading: #123f46;
+  --button: #176b6b;
+  --button-hover: #123f46;
+  --body: #123f46;
+  --border: #bfe3dc;
+  --accent: #bfe3dc;
+  --card: #ffffff;
+  --shadow-soft: rgba(18, 63, 70, 0.08);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--heading);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-inter);
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--background);
+}
+
+body {
+  background: var(--background);
+  color: var(--body);
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  line-height: 1.7;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--heading);
+  font-family: var(--font-cormorant), Georgia, serif;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.08;
+}
+
+p,
+li,
+span,
+a,
+button,
+input,
+select,
+textarea {
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+}
+
+::selection {
+  background: var(--accent);
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+.bg-slate-50 { background-color: var(--background) !important; }
+.bg-slate-100 { background-color: var(--section-bg) !important; }
+.bg-slate-900 { background-color: var(--secondary-bg) !important; }
+.bg-slate-900\/70 { background-color: var(--card) !important; }
+.bg-slate-950 { background-color: var(--button) !important; }
+.bg-slate-800 { background-color: var(--heading) !important; }
+
+.border-slate-200,
+.border-slate-300,
+.border-slate-700,
+.border-slate-800 {
+  border-color: var(--border) !important;
+}
+
+.text-slate-950,
+.text-slate-900,
+.text-slate-800 {
+  color: var(--heading) !important;
+}
+
+.text-slate-700,
+.text-slate-600,
+.text-slate-500,
+.text-slate-400,
+.text-slate-300,
+.text-slate-200 {
+  color: var(--body) !important;
+}
+
+.text-slate-100 {
+  color: var(--heading) !important;
+}
+
+.border-slate-400,
+.border-slate-500,
+.border-slate-600 {
+  border-color: var(--accent) !important;
+}
+
+@layer components {
+  .section-shell {
+    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center rounded-full border border-[var(--border)] bg-[var(--section-bg)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--heading)];
+  }
+
+  .section-heading {
+    @apply text-3xl font-semibold tracking-tight text-[var(--heading)] sm:text-4xl;
+  }
+
+  .section-copy {
+    @apply max-w-2xl text-base leading-7 text-[var(--body)];
+  }
+
+  .premium-card {
+    @apply rounded-[28px] border border-[var(--border)] bg-[var(--card)] p-6 shadow-[0_20px_60px_rgba(18,63,70,0.06)];
+  }
+
+  .primary-button {
+      @apply inline-flex items-center justify-center gap-2 rounded-full bg-[var(--button)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--button-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--button)];
+  }
+
+  .secondary-button {
+      @apply inline-flex items-center justify-center gap-2 rounded-full border border-[var(--border)] bg-[var(--card)] px-5 py-3 text-sm font-semibold text-[var(--heading)] transition hover:border-[var(--accent)] hover:bg-[var(--secondary-bg)] hover:text-[var(--heading)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--heading)];
+  }
+}
