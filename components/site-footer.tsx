@@ -12,48 +12,60 @@ const quickLinks = [
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-[var(--border)] bg-[var(--section-bg)] text-[var(--body)]">
-      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+    <footer className="border-t border-border bg-surface-2">
+      <div className="section-shell py-16">
         <div className="grid gap-10 lg:grid-cols-[1.4fr_0.8fr_1fr]">
           <div>
-            <div className="mb-4 flex items-center gap-3">
+            <div className="mb-5 flex items-center gap-3">
               <Image
                 src="/assets/muforge-logo-clean.png"
                 alt=""
                 width={661}
                 height={420}
-                className="h-16 w-auto object-contain contrast-125 brightness-110"
+                className="logo-mark h-9 w-auto"
               />
               <span className="flex flex-col leading-none">
-                <span className="font-display text-2xl font-semibold tracking-tight text-text">
+                <span className="font-display text-xl font-semibold tracking-tight text-text">
                   MuForge
                 </span>
-                <span className="mt-1 text-[8px] font-semibold uppercase tracking-[0.14em] text-[var(--body)]">
-                  TECHNOLOGY THAT MOVES
+                <span className="mt-1 text-2xs font-medium text-text-muted">
+                  Technology that moves
                 </span>
               </span>
             </div>
-            <p className="max-w-md text-sm leading-7 text-[var(--body)]">
-              MuForge helps businesses and learners move forward with practical technology, digital growth, and future-ready skills.
+            <p className="max-w-measure text-sm text-text-muted">
+              MuForge helps businesses and learners move forward with practical technology,
+              digital growth, and future-ready skills.
             </p>
-            <div className="mt-6 flex flex-wrap gap-4 text-sm text-[var(--body)]">
-              <a href="mailto:muforgetech@gmail.com" className="inline-flex items-center gap-2 transition hover:text-[var(--button-hover)]">
-                <Mail size={15} />
+            <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3 text-sm">
+              <a
+                href="mailto:muforgetech@gmail.com"
+                className="inline-flex items-center gap-2 text-text-muted transition-colors duration-200 hover:text-ember"
+              >
+                <Mail size={15} aria-hidden="true" />
                 muforgetech@gmail.com
               </a>
-              <a href="https://wa.me/919790261693" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 transition hover:text-[var(--button-hover)]">
-                <MessageCircle size={15} />
-                +91 9790261693
+              <a
+                href="https://wa.me/919790261693"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 text-text-muted transition-colors duration-200 hover:text-ember"
+              >
+                <MessageCircle size={15} aria-hidden="true" />
+                <span className="font-mono tabular-nums">+91 97902 61693</span>
               </a>
             </div>
           </div>
 
           <div>
-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-[0.2em] text-[var(--heading)]">Explore</h3>
-            <ul className="space-y-3 text-sm text-[var(--body)]">
+            <h2 className="mb-4 text-2xs font-semibold uppercase text-text-muted">Explore</h2>
+            <ul className="space-y-3 text-sm">
               {quickLinks.map((link) => (
                 <li key={link.href}>
-                  <Link href={link.href} className="transition hover:text-[var(--button-hover)]">
+                  <Link
+                    href={link.href}
+                    className="text-text-muted transition-colors duration-200 hover:text-ember"
+                  >
                     {link.label}
                   </Link>
                 </li>
@@ -62,15 +74,20 @@ export function SiteFooter() {
           </div>
 
           <div>
-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-[0.2em] text-[var(--heading)]">Visit</h3>
-            <ul className="space-y-3 text-sm text-[var(--body)]">
+            <h2 className="mb-4 text-2xs font-semibold uppercase text-text-muted">Visit</h2>
+            <ul className="space-y-3 text-sm text-text-muted">
               <li className="flex items-start gap-2">
-                <MapPin size={15} className="mt-0.5 shrink-0" />
+                <MapPin size={15} className="mt-1 shrink-0" aria-hidden="true" />
                 <span>Coimbatore, Tamil Nadu, India</span>
               </li>
               <li className="flex items-start gap-2">
-                <AtSign size={15} className="mt-0.5 shrink-0" />
-                <a href="https://www.instagram.com/mu.forge/" target="_blank" rel="noreferrer" className="transition hover:text-[var(--button-hover)]">
+                <AtSign size={15} className="mt-1 shrink-0" aria-hidden="true" />
+                <a
+                  href="https://www.instagram.com/mu.forge/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="transition-colors duration-200 hover:text-ember"
+                >
                   @mu.forge
                 </a>
               </li>
@@ -78,9 +95,11 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col gap-4 border-t border-[var(--border)] pt-6 text-sm text-[var(--body)] sm:flex-row sm:items-center sm:justify-between">
-          <p>© 2025 MuForge. All rights reserved.</p>
-          <p>Built for trust, performance, and business growth.</p>
+        <div className="mt-12 flex flex-col gap-3 border-t border-border pt-6 text-sm text-text-muted sm:flex-row sm:items-center sm:justify-between">
+          {/* No year: the page is prerendered, so a rendered year would freeze
+              at build time and go stale, as the hard-coded 2025 did. */}
+          <p>© MuForge. All rights reserved.</p>
+          <p>Built in Coimbatore for businesses and learners.</p>
         </div>
       </div>
     </footer>

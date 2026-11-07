@@ -67,6 +67,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full bg-bg text-text">
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-control focus:bg-ember focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-on-ember"
+        >
+          Skip to content
+        </a>
         <div className="flex min-h-screen flex-col">
           <SiteHeader />
           <main id="main" className="flex-1">

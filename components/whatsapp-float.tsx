@@ -11,7 +11,7 @@ export function WhatsAppFloat() {
       rel="noopener noreferrer"
       aria-label="Chat with MuForge on WhatsApp"
       title="Chat with MuForge on WhatsApp"
-      className="fixed bottom-5 right-5 z-50 inline-flex size-14 items-center justify-center rounded-full bg-[#176B6B] text-white shadow-[0_8px_24px_rgba(18,63,70,0.22)] transition hover:scale-105 hover:bg-[#123F46] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#176B6B] sm:bottom-7 sm:right-7 sm:size-16"
+      className="fixed bottom-5 right-5 z-40 inline-flex size-12 items-center justify-center rounded-full bg-steel text-bg shadow-1 transition-transform duration-200 hover:-translate-y-0.5 sm:bottom-7 sm:right-7 sm:size-14"
     >
       <svg
         aria-hidden="true"
