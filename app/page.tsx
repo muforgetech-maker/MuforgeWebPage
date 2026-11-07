@@ -1,16 +1,16 @@
-import Image from "next/image";
 import Link from "next/link";
 import { OrderFlowDemo } from "@/components/order-flow-demo";
+import { WorkflowMock } from "@/components/workflow-mock";
 import {
   ArrowRight,
   BriefcaseBusiness,
   Building2,
   ChartNoAxesCombined,
+  ChevronDown,
   ChevronRight,
   CirclePlay,
   FileText,
   Layers3,
-  MessageSquareQuote,
   Monitor,
   Rocket,
   ShoppingCart,
@@ -57,27 +57,37 @@ const services = [
   },
 ];
 
+// Stock photographs of unrelated offices were standing in for project work.
+// The cards now describe the build instead of illustrating it with a photo.
 const projectCards = [
   {
     title: "Manufacturing Operations Dashboard",
-    description: "A practical dashboard to track production, inventory, and business performance in one place.",
+    description:
+      "A practical dashboard to track production, inventory, and business performance in one place.",
     accent: "Operations",
-    image:
-      "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=900&q=80",
+    facts: [
+      { label: "Focus", value: "Production visibility" },
+      { label: "Built with", value: "Next.js, TypeScript" },
+    ],
   },
   {
     title: "Business Website Redesign",
     description: "A cleaner digital presence focused on trust, clarity, and lead generation.",
     accent: "Branding",
-    image:
-      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=900&q=80",
+    facts: [
+      { label: "Focus", value: "Lead generation" },
+      { label: "Built with", value: "WordPress, SEO" },
+    ],
   },
   {
     title: "Procurement Workflow System",
-    description: "Automated purchase requests, approvals, and tracking to reduce operational delay.",
+    description:
+      "Automated purchase requests, approvals, and tracking to reduce operational delay.",
     accent: "Automation",
-    image:
-      "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=900&q=80",
+    facts: [
+      { label: "Focus", value: "Approval cycle time" },
+      { label: "Built with", value: "Process mapping" },
+    ],
   },
 ];
 
@@ -104,6 +114,12 @@ const processSteps = [
   "Shape the right solution, timeline, and digital process for your situation.",
   "Build, refine, and test with practical feedback at each stage.",
   "Launch confidently and support what matters most to your growth.",
+];
+
+const sapOutcomes = [
+  "Understand core SAP processes and user workflows.",
+  "Practice guided assignments and real system tasks.",
+  "Build confidence for academic and career-oriented learning.",
 ];
 
 const faqs = [
@@ -172,232 +188,281 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="py-20">
+      <section className="border-t border-border py-section">
         <div className="section-shell">
-          <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-            <div className="rounded-[28px] border border-slate-200 bg-white p-4 shadow-[0_20px_60px_rgba(18,63,70,0.05)]">
-              <Image
-                src="https://images.unsplash.com/photo-1556157382-97eda2d62296?auto=format&fit=crop&w=900&q=80"
-                alt="Professional technology consultation"
-                width={900}
-                height={700}
-                className="h-full min-h-[300px] w-full rounded-[22px] object-cover"
-              />
-            </div>
-            <div>
+          <div className="grid items-center gap-12 lg:grid-cols-2">
+            <div className="reveal">
               <span className="eyebrow">About MuForge</span>
-              <h2 className="mt-5 section-heading">We help businesses move with clearer systems and better digital direction.</h2>
+              <h2 className="mt-5 section-heading">
+                We help businesses move with clearer systems and better digital direction.
+              </h2>
               <p className="mt-5 section-copy">
-                MuForge is a technology and digital solutions company focused on practical business support. We work with companies, founders, and learners who need reliable technology, stronger online presence, and a clearer path forward.
+                MuForge is a technology and digital solutions company focused on practical
+                business support. We work with companies, founders, and learners who need
+                reliable technology, stronger online presence, and a clearer path forward.
               </p>
               <p className="mt-4 section-copy">
-                Whether the need is software, website development, digital marketing, or SAP learning, our approach keeps solutions customized, transparent, and aligned with real goals.
+                Whether the need is software, website development, digital marketing, or SAP
+                learning, our approach keeps solutions customized, transparent, and aligned with
+                real goals.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link href="/about" className="primary-button">
                   Learn More
-                  <ChevronRight size={16} />
+                  <ChevronRight size={16} aria-hidden="true" />
                 </Link>
-                <a href="https://wa.me/919790261693" target="_blank" rel="noreferrer" className="secondary-button">
+                <a
+                  href="https://wa.me/919790261693"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="secondary-button"
+                >
                   WhatsApp Us
                 </a>
               </div>
+            </div>
+
+            <div className="reveal lg:order-first">
+              <WorkflowMock />
             </div>
           </div>
         </div>
       </section>
 
-      <section className="bg-[var(--secondary-bg)] py-20">
+      <section className="border-t border-border bg-surface-2 py-section">
         <div className="section-shell">
           <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
               <span className="eyebrow">Services</span>
               <h2 className="mt-5 section-heading">Built for business growth and digital clarity.</h2>
             </div>
-            <Link href="/services" className="inline-flex items-center gap-2 text-sm font-medium text-[var(--button)] transition hover:text-[var(--button-hover)]">
+            <Link
+              href="/services"
+              className="inline-flex items-center gap-2 whitespace-nowrap text-sm font-semibold text-ember transition-colors duration-200 hover:text-ember-hover"
+            >
               View all services
-              <ArrowRight size={15} />
+              <ArrowRight size={15} aria-hidden="true" />
             </Link>
           </div>
 
-          <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-5">
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {services.map(({ title, description, icon: Icon }) => (
-              <div key={title} className="rounded-[26px] border border-[var(--border)] bg-white p-5 transition hover:-translate-y-1 hover:border-[var(--accent)]">
-                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--accent)] text-[var(--button)]">
-                  <Icon size={22} />
+              <div
+                key={title}
+                className="reveal rounded-card border border-border bg-surface p-6 transition duration-200 hover:-translate-y-0.5 hover:border-border-strong"
+              >
+                <div className="mb-5 flex size-10 items-center justify-center rounded-control bg-ember-wash text-ember">
+                  <Icon size={20} aria-hidden="true" />
                 </div>
-                <h3 className="text-lg font-semibold text-slate-950">{title}</h3>
-                <p className="mt-3 text-sm leading-7 text-slate-600">{description}</p>
+                <h3 className="text-h3 font-semibold text-text">{title}</h3>
+                <p className="mt-2 text-sm text-text-muted">{description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="py-20">
+      <section className="border-t border-border py-section">
         <div className="section-shell">
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
-              <span className="eyebrow">Featured projects</span>
-              <h2 className="mt-5 section-heading">Representative work that reflects practical business thinking.</h2>
+              <span className="eyebrow">Demonstration projects</span>
+              <h2 className="mt-5 section-heading">
+                Representative work that reflects practical business thinking.
+              </h2>
+              <p className="mt-4 section-copy">
+                MuForge is newly launched, so these are demonstration projects that show the kind
+                of work we build, not client engagements.
+              </p>
             </div>
-            <Link href="/portfolio" className="inline-flex items-center gap-2 text-sm font-medium text-[var(--body)] transition hover:text-[var(--heading)]">
+            <Link
+              href="/portfolio"
+              className="inline-flex items-center gap-2 whitespace-nowrap text-sm font-semibold text-ember transition-colors duration-200 hover:text-ember-hover"
+            >
               Explore portfolio
-              <ArrowRight size={15} />
+              <ArrowRight size={15} aria-hidden="true" />
             </Link>
           </div>
 
-          <div className="mt-10 grid gap-6 lg:grid-cols-3">
+          <div className="mt-10 grid gap-4 lg:grid-cols-3">
             {projectCards.map((project) => (
-              <article key={project.title} className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_20px_50px_rgba(18,63,70,0.06)]">
-                <div className="relative h-56 overflow-hidden">
-                  <Image src={project.image} alt={project.title} width={900} height={700} className="h-full w-full object-cover" />
-                  <span className="absolute left-4 top-4 rounded-control bg-ember px-3 py-1 text-2xs font-semibold uppercase text-on-ember">
+              <article
+                key={project.title}
+                className="reveal flex flex-col rounded-card border border-border bg-surface p-6 transition duration-200 hover:-translate-y-0.5 hover:border-border-strong"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="rounded-control bg-ember-wash px-2 py-1 text-2xs font-semibold uppercase text-ember">
                     {project.accent}
                   </span>
+                  <span className="rounded-control border border-border px-2 py-1 text-2xs font-semibold uppercase text-text-muted">
+                    Demonstration
+                  </span>
                 </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold text-slate-950">{project.title}</h3>
-                  <p className="mt-3 text-sm leading-7 text-slate-600">{project.description}</p>
-                </div>
+                <h3 className="mt-5 text-h3 font-semibold text-text">{project.title}</h3>
+                <p className="mt-2 text-sm text-text-muted">{project.description}</p>
+                <dl className="mt-5 grid grid-cols-2 gap-3 border-t border-border pt-4">
+                  {project.facts.map((fact) => (
+                    <div key={fact.label}>
+                      <dt className="text-2xs uppercase text-text-muted">{fact.label}</dt>
+                      <dd className="mt-1 text-sm text-text">{fact.value}</dd>
+                    </div>
+                  ))}
+                </dl>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="bg-slate-100 py-20">
+      <section className="border-t border-border bg-surface-2 py-section">
         <div className="section-shell">
-          <div className="max-w-2xl">
+          <div className="max-w-measure">
             <span className="eyebrow">Why choose MuForge</span>
-            <h2 className="mt-5 section-heading">A reliable partner for digital growth and operational clarity.</h2>
+            <h2 className="mt-5 section-heading">
+              A reliable partner for digital growth and operational clarity.
+            </h2>
           </div>
 
-          <div className="mt-10 grid gap-6 lg:grid-cols-3">
+          <div className="mt-10 grid gap-4 lg:grid-cols-3">
             {reasons.map(({ title, description, icon: Icon }) => (
-              <div key={title} className="premium-card p-7">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-900">
-                  <Icon size={20} />
+              <div key={title} className="reveal premium-card">
+                <div className="flex size-10 items-center justify-center rounded-control bg-ember-wash text-ember">
+                  <Icon size={20} aria-hidden="true" />
                 </div>
-                <h3 className="mt-5 text-xl font-semibold text-slate-950">{title}</h3>
-                <p className="mt-3 text-sm leading-7 text-slate-600">{description}</p>
+                <h3 className="mt-5 text-h3 font-semibold text-text">{title}</h3>
+                <p className="mt-2 text-sm text-text-muted">{description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="py-20">
+      <section className="border-t border-border py-section">
         <div className="section-shell">
-          <div className="max-w-2xl">
+          <div className="max-w-measure">
             <span className="eyebrow">Process</span>
-            <h2 className="mt-5 section-heading">A clear and practical approach from conversation to delivery.</h2>
+            <h2 className="mt-5 section-heading">
+              A clear and practical approach from conversation to delivery.
+            </h2>
           </div>
 
-          <div className="mt-10 grid gap-6 lg:grid-cols-4">
+          <ol className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {processSteps.map((step, index) => (
-              <div key={step} className="rounded-[26px] border border-slate-200 bg-white p-6 shadow-[0_20px_60px_rgba(18,63,70,0.04)]">
-                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-slate-950 text-sm font-semibold text-on-ember">
-                  0{index + 1}
-                </div>
-                <p className="text-base leading-7 text-slate-700">{step}</p>
-              </div>
+              <li key={step} className="reveal rounded-card border border-border bg-surface p-6">
+                <span className="font-mono text-sm font-semibold tabular-nums text-ember">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <p className="mt-4 text-sm text-text-muted">{step}</p>
+              </li>
             ))}
-          </div>
+          </ol>
         </div>
       </section>
 
-      <section className="bg-[var(--secondary-bg)] py-20">
-        <div className="section-shell grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-          <div>
+      <section className="border-t border-border bg-surface-2 py-section">
+        <div className="section-shell grid items-center gap-12 lg:grid-cols-2">
+          <div className="reveal">
             <span className="eyebrow">SAP Training</span>
-            <h2 className="mt-5 section-heading">Practical SAP FI and SAP MM training for students and career-focused learners.</h2>
-            <p className="mt-5 max-w-lg text-base leading-7 text-slate-600">
-              Learn through hands-on exercises, guided assignments, and a learning approach designed to build confidence in real SAP workflows.
+            <h2 className="mt-5 section-heading">
+              Practical SAP FI and SAP MM training for students and career-focused learners.
+            </h2>
+            <p className="mt-5 section-copy">
+              Learn through hands-on exercises, guided assignments, and a learning approach
+              designed to build confidence in real SAP workflows.
             </p>
-            <div className="mt-8 flex flex-wrap gap-4">
+            <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/sap-training" className="primary-button">
                 Explore SAP Programs
               </Link>
-              <a href="https://wa.me/919790261693" target="_blank" rel="noreferrer" className="secondary-button">
+              <a
+                href="https://wa.me/919790261693"
+                target="_blank"
+                rel="noreferrer"
+                className="secondary-button"
+              >
                 WhatsApp enrollment
               </a>
             </div>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="rounded-[28px] border border-[var(--border)] bg-white p-6">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--accent)] text-[var(--button)]">
-                <Layers3 size={19} />
+          <div className="reveal grid gap-4 sm:grid-cols-2">
+            <div className="rounded-card border border-border bg-surface p-6">
+              <div className="mb-4 flex size-10 items-center justify-center rounded-control bg-ember-wash text-ember">
+                <Layers3 size={19} aria-hidden="true" />
               </div>
-              <h3 className="text-xl font-semibold text-slate-950">SAP FI</h3>
-              <p className="mt-3 text-sm leading-7 text-slate-600">Finance-related process understanding and practical system tasks.</p>
+              <h3 className="text-h3 font-semibold text-text">SAP FI</h3>
+              <p className="mt-2 text-sm text-text-muted">
+                Finance-related process understanding and practical system tasks.
+              </p>
             </div>
-            <div className="rounded-[28px] border border-[var(--border)] bg-white p-6">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--accent)] text-[var(--button)]">
-                <ShoppingCart size={19} />
+            <div className="rounded-card border border-border bg-surface p-6">
+              <div className="mb-4 flex size-10 items-center justify-center rounded-control bg-ember-wash text-ember">
+                <ShoppingCart size={19} aria-hidden="true" />
               </div>
-              <h3 className="text-xl font-semibold text-slate-950">SAP MM</h3>
-              <p className="mt-3 text-sm leading-7 text-slate-600">Procurement workflows and business operations learning with practical exercises.</p>
+              <h3 className="text-h3 font-semibold text-text">SAP MM</h3>
+              <p className="mt-2 text-sm text-text-muted">
+                Procurement workflows and business operations learning with practical exercises.
+              </p>
             </div>
-            <div className="rounded-[28px] border border-[var(--border)] bg-white p-6 md:col-span-2">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--accent)] text-[var(--button)]">
-                <Rocket size={19} />
+            <div className="rounded-card border border-border bg-surface p-6 sm:col-span-2">
+              <div className="mb-4 flex size-10 items-center justify-center rounded-control bg-ember-wash text-ember">
+                <Rocket size={19} aria-hidden="true" />
               </div>
-              <h3 className="text-xl font-semibold text-slate-950">Learning outcomes</h3>
-              <ul className="mt-3 space-y-3 text-sm leading-7 text-slate-600">
-                <li className="flex items-start gap-3"><span className="mt-1 text-[var(--button)]">•</span> Understand core SAP processes and user workflows.</li>
-                <li className="flex items-start gap-3"><span className="mt-1 text-[var(--button)]">•</span> Practice guided assignments and real system tasks.</li>
-                <li className="flex items-start gap-3"><span className="mt-1 text-[var(--button)]">•</span> Build confidence for academic and career-oriented learning.</li>
+              <h3 className="text-h3 font-semibold text-text">Learning outcomes</h3>
+              <ul className="mt-3 space-y-2 text-sm text-text-muted">
+                {sapOutcomes.map((outcome) => (
+                  <li key={outcome} className="flex items-start gap-3">
+                    <span aria-hidden="true" className="mt-2 size-1 shrink-0 rounded-full bg-ember" />
+                    {outcome}
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="py-20">
-        <div className="section-shell max-w-4xl">
-          <div className="mb-10 max-w-2xl">
+      <section className="border-t border-border py-section">
+        <div className="section-shell">
+          <div className="mb-10 max-w-measure">
             <span className="eyebrow">FAQs</span>
             <h2 className="mt-5 section-heading">Common questions from businesses and learners.</h2>
           </div>
-          <div className="space-y-4">
+          {/* <details> gives real disclosure semantics and keyboard support
+              that the previous always-open divs did not have. */}
+          <div className="max-w-3xl divide-y divide-border border-y border-border">
             {faqs.map((faq) => (
-              <div key={faq.question} className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-[0_20px_50px_rgba(18,63,70,0.04)]">
-                <div className="flex items-start gap-4">
-                  <div className="mt-1 flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-800">
-                    <MessageSquareQuote size={15} />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-slate-900">{faq.question}</h3>
-                    <p className="mt-2 text-sm leading-7 text-slate-600">{faq.answer}</p>
-                  </div>
-                </div>
-              </div>
+              <details key={faq.question} className="group">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-left text-h3 font-semibold text-text marker:hidden">
+                  {faq.question}
+                  <ChevronDown
+                    size={18}
+                    aria-hidden="true"
+                    className="shrink-0 text-text-muted transition-transform duration-200 group-open:rotate-180"
+                  />
+                </summary>
+                <p className="max-w-measure pb-5 text-sm text-text-muted">{faq.answer}</p>
+              </details>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="pb-20">
-        <div className="section-shell">
-          <div className="rounded-[30px] border border-slate-200 bg-[var(--section-bg)] px-6 py-10 shadow-[0_30px_80px_rgba(18,63,70,0.1)] sm:px-8 lg:px-12">
-            <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
-              <div>
-                <span className="eyebrow">Let’s talk</span>
-                <h2 className="mt-5 max-w-xl text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
-                  Ready to build something useful, polished, and growth-focused?
-                </h2>
-              </div>
-              <div className="flex flex-col gap-4 sm:flex-row lg:justify-end">
-                <Link href="/contact" className="primary-button">
-                  Start a conversation
-                </Link>
-                <a href="mailto:muforgetech@gmail.com" className="secondary-button">
-                  Email us
-                </a>
-              </div>
-            </div>
+      <section className="border-t border-border bg-surface-2 py-section">
+        <div className="section-shell flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-center">
+          <div>
+            <span className="eyebrow">Let’s talk</span>
+            <h2 className="mt-5 max-w-measure section-heading">
+              Ready to build something useful, polished, and growth-focused?
+            </h2>
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Link href="/contact" className="primary-button">
+              Start a conversation
+            </Link>
+            <a href="mailto:muforgetech@gmail.com" className="secondary-button">
+              Email us
+            </a>
           </div>
         </div>
       </section>
