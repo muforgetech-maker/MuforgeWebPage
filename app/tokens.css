@@ -1,0 +1,169 @@
+/*
+ * Forge design tokens
+ * ---------------------------------------------------------------------------
+ * Single source of truth for colour, type, space, radius, shadow and motion.
+ * Never hard-code a colour in a component; use a semantic utility
+ * (bg-surface, text-text-muted, border-border) or a var() from this file.
+ *
+ * Theme resolution:
+ *   1. Light is the default.
+ *   2. The OS setting applies unless the visitor pinned a theme.
+ *   3. [data-theme] (set by the toggle, persisted in localStorage) always wins.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Surfaces ------------------------------------------------------------- */
+  --bg: #faf8f5;
+  --surface: #ffffff;
+  --surface-2: #f2eee8;
+
+  /* Lines ---------------------------------------------------------------- */
+  --border: #e4ded5; /* decorative hairlines */
+  --border-strong: #8b8478; /* form controls: meets 3:1 against --bg */
+
+  /* Text ----------------------------------------------------------------- */
+  --text: #14161b;
+  --text-muted: #565b66;
+
+  /* Accents -------------------------------------------------------------- */
+  --ember: #c2410c;
+  --ember-hover: color-mix(in oklab, #c2410c 86%, #14161b);
+  --on-ember: #ffffff; /* foreground on an ember fill */
+  --ember-glow: linear-gradient(135deg, #f97316 0%, #f59e0b 100%);
+  --ember-wash: rgba(194, 65, 12, 0.08); /* tint for chips and hover states */
+  --steel: #0f766e;
+  --danger: #b91c1c;
+
+  /* Elevation — one soft level only -------------------------------------- */
+  --shadow-soft: 0 1px 2px rgba(20, 22, 27, 0.04), 0 12px 32px rgba(20, 22, 27, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --bg: #0b0d12;
+    --surface: #12151c;
+    --surface-2: #1a1e27;
+
+    --border: #262b36;
+    --border-strong: #646b7a;
+
+    --text: #f3f1ec;
+    --text-muted: #a3a8b3;
+
+    --ember: #fb7a3c;
+    --ember-hover: color-mix(in oklab, #fb7a3c 86%, #f3f1ec);
+    --on-ember: #0b0d12; /* white on light ember fails AA; near-black passes */
+    --ember-wash: rgba(251, 122, 60, 0.12);
+    --steel: #2dd4bf;
+    --danger: #f87171;
+
+    --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.45);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #0b0d12;
+  --surface: #12151c;
+  --surface-2: #1a1e27;
+
+  --border: #262b36;
+  --border-strong: #646b7a;
+
+  --text: #f3f1ec;
+  --text-muted: #a3a8b3;
+
+  --ember: #fb7a3c;
+  --ember-hover: color-mix(in oklab, #fb7a3c 86%, #f3f1ec);
+  --on-ember: #0b0d12;
+  --ember-wash: rgba(251, 122, 60, 0.12);
+  --steel: #2dd4bf;
+  --danger: #f87171;
+
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+/* ---------------------------------------------------------------------------
+ * Tailwind mapping. `inline` emits var() references rather than resolved
+ * values, so every utility follows the active theme with no dark: duplication.
+ * ------------------------------------------------------------------------ */
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-ember: var(--ember);
+  --color-ember-hover: var(--ember-hover);
+  --color-on-ember: var(--on-ember);
+  --color-ember-wash: var(--ember-wash);
+  --color-steel: var(--steel);
+  --color-danger: var(--danger);
+
+  /* Type ----------------------------------------------------------------- */
+  --font-display: var(--font-bricolage), "Segoe UI", system-ui, sans-serif;
+  --font-sans: var(--font-geist), "Segoe UI", system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "Cascadia Mono", monospace;
+
+  --text-2xs: 0.6875rem; /* 11px — chips and overlines only */
+  --text-2xs--line-height: 1.45;
+  --text-2xs--letter-spacing: 0.08em;
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.5;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.55;
+  --text-base: clamp(1rem, 0.955rem + 0.2vw, 1.125rem);
+  --text-base--line-height: 1.6;
+  --text-lg: clamp(1.125rem, 1.06rem + 0.28vw, 1.3125rem);
+  --text-lg--line-height: 1.6;
+
+  /* Display sizes: tighter tracking as they grow */
+  --text-h3: clamp(1.125rem, 1.05rem + 0.35vw, 1.375rem);
+  --text-h3--line-height: 1.3;
+  --text-h3--letter-spacing: -0.01em;
+  --text-h2: clamp(1.75rem, 1.5rem + 1.25vw, 2.5rem);
+  --text-h2--line-height: 1.15;
+  --text-h2--letter-spacing: -0.022em;
+  --text-h1: clamp(2.25rem, 1.8rem + 2.2vw, 3.5rem);
+  --text-h1--line-height: 1.08;
+  --text-h1--letter-spacing: -0.028em;
+  --text-hero: clamp(2.5rem, 1.85rem + 3.1vw, 4.5rem);
+  --text-hero--line-height: 1.04;
+  --text-hero--letter-spacing: -0.035em;
+
+  /* Space and measure ---------------------------------------------------- */
+  --spacing-section: clamp(4rem, 2.5rem + 6vw, 8rem); /* 64 → 128px */
+  --container-shell: 75rem; /* 1200px */
+  --container-measure: 68ch;
+
+  /* Radius --------------------------------------------------------------- */
+  --radius-card: 12px;
+  --radius-control: 8px;
+
+  /* Elevation ------------------------------------------------------------ */
+  --shadow-1: var(--shadow-soft);
+
+  /* Motion --------------------------------------------------------------- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* `dark:` is rarely needed because tokens already flip, but it is here for
+   the few places that need a different rule rather than a different value. */
+@custom-variant dark {
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme="light"]), :root:not([data-theme="light"]) *) {
+      @slot;
+    }
+  }
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+}

@@ -1,20 +1,32 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Inter } from "next/font/google";
+import { Bricolage_Grotesque, Geist, Geist_Mono } from "next/font/google";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const cormorant = Cormorant_Garamond({
-  variable: "--font-cormorant",
+const geist = Geist({
+  variable: "--font-geist",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+// Runs before first paint so a pinned theme never flashes. With no stored
+// choice no attribute is set, which leaves the OS preference in charge and
+// lets the page follow it live.
+const themeScript = `try{var t=localStorage.getItem("mf-theme");if(t==="dark"||t==="light"){document.documentElement.setAttribute("data-theme",t)}}catch(e){}`;
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://muforge.netlify.app"),
@@ -49,14 +61,17 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="en"
-      className={`${inter.variable} ${cormorant.variable} h-full antialiased`}
+      lang="en-IN"
+      className={`${bricolage.variable} ${geist.variable} ${geistMono.variable} h-full`}
       suppressHydrationWarning
     >
-      <body className="min-h-full bg-[var(--background)] text-[var(--body)] antialiased">
-        <div className="min-h-screen">
+      <body className="min-h-full bg-bg text-text">
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <div className="flex min-h-screen flex-col">
           <SiteHeader />
-          <main>{children}</main>
+          <main id="main" className="flex-1">
+            {children}
+          </main>
           <SiteFooter />
           <WhatsAppFloat />
         </div>

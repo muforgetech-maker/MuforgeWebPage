@@ -25,7 +25,7 @@ export function SiteFooter() {
                 className="h-16 w-auto object-contain contrast-125 brightness-110"
               />
               <span className="flex flex-col leading-none">
-                <span className="font-[var(--font-cormorant)] text-2xl font-semibold tracking-tight text-[var(--heading)]">
+                <span className="font-display text-2xl font-semibold tracking-tight text-text">
                   MuForge
                 </span>
                 <span className="mt-1 text-[8px] font-semibold uppercase tracking-[0.14em] text-[var(--body)]">

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Menu, Phone, Sparkles } from "lucide-react";
 import { useState } from "react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const navItems = [
   { href: "/", label: "Home" },
@@ -29,7 +30,7 @@ export function SiteHeader() {
             className="h-16 w-auto object-contain contrast-125 brightness-110 sm:h-20"
           />
           <span className="flex flex-col leading-none">
-            <span className="font-[var(--font-cormorant)] text-3xl font-semibold tracking-tight text-[var(--heading)] sm:text-4xl">
+            <span className="font-display text-3xl font-semibold tracking-tight text-text sm:text-4xl">
               MuForge
             </span>
             <span className="mt-1 text-[8px] font-semibold uppercase tracking-[0.14em] text-[var(--body)] sm:text-[9px]">
@@ -51,6 +52,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
+          <ThemeToggle />
           <a
             href="tel:+919790261693"
             className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--secondary-bg)] px-4 py-2 text-sm font-medium text-[var(--body)] transition hover:border-[var(--accent)] hover:text-[var(--heading)]"
@@ -67,15 +69,18 @@ export function SiteHeader() {
           </Link>
         </div>
 
-        <button
+        <div className="flex items-center gap-2 lg:hidden">
+          <ThemeToggle />
+          <button
           type="button"
           aria-label="Toggle navigation menu"
           aria-expanded={mobileOpen}
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="inline-flex items-center justify-center rounded-full border border-[var(--border)] bg-[var(--secondary-bg)] p-2 text-[var(--heading)] lg:hidden"
-        >
-          <Menu size={20} />
-        </button>
+            className="inline-flex size-10 items-center justify-center rounded-control border border-border text-text"
+          >
+            <Menu size={20} />
+          </button>
+        </div>
       </div>
 
       {mobileOpen && (
