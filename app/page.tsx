@@ -254,7 +254,7 @@ export default function HomePage() {
             </div>
             <Link
               href="/services"
-              className="inline-flex items-center gap-2 whitespace-nowrap text-sm font-semibold text-ember transition-colors duration-200 hover:text-ember-hover"
+              className="inline-flex items-center gap-2 whitespace-nowrap py-1 text-sm font-semibold text-ember transition-colors duration-200 hover:text-ember-hover"
             >
               View all services
               <ArrowRight size={15} aria-hidden="true" />
@@ -293,7 +293,7 @@ export default function HomePage() {
             </div>
             <Link
               href="/portfolio"
-              className="inline-flex items-center gap-2 whitespace-nowrap text-sm font-semibold text-ember transition-colors duration-200 hover:text-ember-hover"
+              className="inline-flex items-center gap-2 whitespace-nowrap py-1 text-sm font-semibold text-ember transition-colors duration-200 hover:text-ember-hover"
             >
               Explore portfolio
               <ArrowRight size={15} aria-hidden="true" />

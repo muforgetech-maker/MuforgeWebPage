@@ -42,7 +42,7 @@ export default function ContactPage() {
                   <Mail size={18} aria-hidden="true" className="mt-0.5 shrink-0 text-ember" />
                   <a
                     href="mailto:muforgetech@gmail.com"
-                    className="transition-colors duration-200 hover:text-ember"
+                    className="inline-block py-0.5 transition-colors duration-200 hover:text-ember"
                   >
                     muforgetech@gmail.com
                   </a>
@@ -51,7 +51,7 @@ export default function ContactPage() {
                   <Phone size={18} aria-hidden="true" className="mt-0.5 shrink-0 text-ember" />
                   <a
                     href="tel:+919790261693"
-                    className="font-mono tabular-nums transition-colors duration-200 hover:text-ember"
+                    className="inline-block py-0.5 font-mono tabular-nums transition-colors duration-200 hover:text-ember"
                   >
                     +91 97902 61693
                   </a>
@@ -66,7 +66,7 @@ export default function ContactPage() {
                     href="https://wa.me/919790261693"
                     target="_blank"
                     rel="noreferrer"
-                    className="transition-colors duration-200 hover:text-ember"
+                    className="inline-block py-0.5 transition-colors duration-200 hover:text-ember"
                   >
                     WhatsApp chat
                   </a>

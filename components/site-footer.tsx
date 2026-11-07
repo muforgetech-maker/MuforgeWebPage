@@ -40,7 +40,7 @@ export function SiteFooter() {
             <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3 text-sm">
               <a
                 href="mailto:muforgetech@gmail.com"
-                className="inline-flex items-center gap-2 text-text-muted transition-colors duration-200 hover:text-ember"
+                className="inline-flex items-center gap-2 py-1 text-text-muted transition-colors duration-200 hover:text-ember"
               >
                 <Mail size={15} aria-hidden="true" />
                 muforgetech@gmail.com
@@ -49,7 +49,7 @@ export function SiteFooter() {
                 href="https://wa.me/919790261693"
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-2 text-text-muted transition-colors duration-200 hover:text-ember"
+                className="inline-flex items-center gap-2 py-1 text-text-muted transition-colors duration-200 hover:text-ember"
               >
                 <MessageCircle size={15} aria-hidden="true" />
                 <span className="font-mono tabular-nums">+91 97902 61693</span>
@@ -64,7 +64,7 @@ export function SiteFooter() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-text-muted transition-colors duration-200 hover:text-ember"
+                    className="inline-block py-1 text-text-muted transition-colors duration-200 hover:text-ember"
                   >
                     {link.label}
                   </Link>
@@ -86,7 +86,7 @@ export function SiteFooter() {
                   href="https://www.instagram.com/mu.forge/"
                   target="_blank"
                   rel="noreferrer"
-                  className="transition-colors duration-200 hover:text-ember"
+                  className="inline-block py-1 transition-colors duration-200 hover:text-ember"
                 >
                   @mu.forge
                 </a>

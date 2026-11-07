@@ -28,11 +28,14 @@
   --text-muted: #565b66;
 
   /* Accents -------------------------------------------------------------- */
-  --ember: #c2410c;
-  --ember-hover: color-mix(in oklab, #c2410c 86%, #14161b);
+  /* The brief's #c2410c measures 4.48:1 against --surface-2, just under the
+     4.5 AA needs, and the accent carries small text such as eyebrows. This is
+     a shade darker: 4.66:1 on --surface-2 and 5.3:1 on --bg. */
+  --ember: #be3f0b;
+  --ember-hover: color-mix(in oklab, #be3f0b 86%, #14161b);
   --on-ember: #ffffff; /* foreground on an ember fill */
   --ember-glow: linear-gradient(135deg, #f97316 0%, #f59e0b 100%);
-  --ember-wash: rgba(194, 65, 12, 0.08); /* tint for chips and hover states */
+  --ember-wash: rgba(190, 63, 11, 0.08); /* tint for chips and hover states */
   --steel: #0f766e;
   --danger: #b91c1c;
 

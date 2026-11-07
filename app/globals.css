@@ -34,13 +34,18 @@ h6 {
   text-wrap: balance;
 }
 
-/* Form controls do not inherit type by default. */
-input,
-select,
-textarea,
-button {
-  font: inherit;
-  color: inherit;
+/* Form controls do not inherit type by default.
+   This must sit in the base layer: an unlayered rule outranks every layered
+   one, so `color: inherit` here would beat .primary-button's own colour and
+   every button would render in body text colour. */
+@layer base {
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+    color: inherit;
+  }
 }
 
 img,
@@ -267,69 +272,4 @@ svg {
   :root:not([data-theme="light"]) .icon-when-dark {
     display: block;
   }
-}
-
-/* ===========================================================================
- * LEGACY BRIDGE — delete in the final commit.
- *
- * Pages still carry Tailwind slate-* classes and var(--heading)-style custom
- * properties from the previous design. These aliases keep every page correct
- * and themed while the pages are migrated one commit at a time. Nothing new
- * should use them.
- * ======================================================================== */
-
-:root {
-  --background: var(--bg);
-  --card: var(--surface);
-  --section-bg: var(--surface-2);
-  --secondary-bg: var(--surface-2);
-  --heading: var(--text);
-  --body: var(--text-muted);
-  --button: var(--ember);
-  --button-hover: var(--ember-hover);
-  --accent: var(--ember);
-  --shadow-soft-legacy: var(--shadow-soft);
-}
-
-.bg-white,
-.bg-white\/80 { background-color: var(--surface) !important; }
-
-.bg-slate-50 { background-color: var(--bg) !important; }
-.bg-slate-100 { background-color: var(--surface-2) !important; }
-.bg-slate-900 { background-color: var(--surface-2) !important; }
-.bg-slate-900\/70 { background-color: var(--surface) !important; }
-
-.bg-slate-950,
-.bg-slate-800 {
-  background-color: var(--ember) !important;
-  color: var(--on-ember) !important;
-}
-
-.border-slate-200,
-.border-slate-300,
-.border-slate-700,
-.border-slate-800 {
-  border-color: var(--border) !important;
-}
-
-.border-slate-400,
-.border-slate-500,
-.border-slate-600 {
-  border-color: var(--border-strong) !important;
-}
-
-.text-slate-950,
-.text-slate-900,
-.text-slate-800,
-.text-slate-100 {
-  color: var(--text) !important;
-}
-
-.text-slate-700,
-.text-slate-600,
-.text-slate-500,
-.text-slate-400,
-.text-slate-300,
-.text-slate-200 {
-  color: var(--text-muted) !important;
 }

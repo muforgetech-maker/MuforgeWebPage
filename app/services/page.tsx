@@ -101,7 +101,7 @@ export default function ServicesPage() {
                   <p className="mt-2 flex-1 text-sm text-text-muted">{service.description}</p>
                   <Link
                     href="/contact"
-                    className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-ember transition-colors duration-200 hover:text-ember-hover"
+                    className="mt-6 inline-flex items-center gap-2 py-1 text-sm font-semibold text-ember transition-colors duration-200 hover:text-ember-hover"
                     aria-label={`Enquire about ${service.title}`}
                   >
                     Explore service

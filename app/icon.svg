@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="MuForge">
-  <rect width="64" height="64" rx="14" fill="#C2410C"/>
+  <rect width="64" height="64" rx="14" fill="#BE3F0B"/>
   <path d="M8 46V18h7l6 12 6-12h7v28h-6V29l-5 10h-4l-5-10v17z" fill="#FFFFFF"/>
   <path d="M40 46V18h16v6H46v5h9v6h-9v11z" fill="#FFFFFF"/>
 </svg>
