@@ -194,6 +194,9 @@ svg {
   --shadow-soft-legacy: var(--shadow-soft);
 }
 
+.bg-white,
+.bg-white\/80 { background-color: var(--surface) !important; }
+
 .bg-slate-50 { background-color: var(--bg) !important; }
 .bg-slate-100 { background-color: var(--surface-2) !important; }
 .bg-slate-900 { background-color: var(--surface-2) !important; }

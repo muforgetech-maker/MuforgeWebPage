@@ -87,7 +87,7 @@ export default function SAPTrainingPage() {
           <ul className="mt-6 space-y-4 text-sm leading-7 text-slate-700">
             {courseTopics.map((topic) => (
               <li key={topic} className="flex items-start gap-3">
-                <span className="mt-1 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--button)] text-[10px] font-semibold text-white">✓</span>
+                <span className="mt-1 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--button)] text-[10px] font-semibold text-on-ember">✓</span>
                 <span>{topic}</span>
               </li>
             ))}

@@ -346,7 +346,7 @@ export function ContactForm() {
       <button
         type="submit"
         disabled={status === "loading"}
-        className="inline-flex w-full items-center justify-center rounded-full bg-[var(--button)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--button-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--button)] disabled:cursor-not-allowed disabled:opacity-70"
+        className="inline-flex w-full items-center justify-center rounded-full bg-[var(--button)] px-5 py-3 text-sm font-semibold text-on-ember transition hover:bg-[var(--button-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--button)] disabled:cursor-not-allowed disabled:opacity-70"
       >
         {status === "loading" ? "Sending enquiry…" : "Submit enquiry"}
       </button>

@@ -169,7 +169,7 @@ export default function HomePage() {
             </div>
             <div className="absolute -bottom-5 left-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_16px_40px_rgba(18,63,70,0.1)]">
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-950 text-white">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-950 text-on-ember">
                   <BadgeCheck size={18} />
                 </div>
                 <div>
@@ -262,7 +262,7 @@ export default function HomePage() {
               <article key={project.title} className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_20px_50px_rgba(18,63,70,0.06)]">
                 <div className="relative h-56 overflow-hidden">
                   <Image src={project.image} alt={project.title} width={900} height={700} className="h-full w-full object-cover" />
-                  <span className="absolute left-4 top-4 rounded-full bg-[var(--heading)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white">
+                  <span className="absolute left-4 top-4 rounded-control bg-ember px-3 py-1 text-2xs font-semibold uppercase text-on-ember">
                     {project.accent}
                   </span>
                 </div>
@@ -307,7 +307,7 @@ export default function HomePage() {
           <div className="mt-10 grid gap-6 lg:grid-cols-4">
             {processSteps.map((step, index) => (
               <div key={step} className="rounded-[26px] border border-slate-200 bg-white p-6 shadow-[0_20px_60px_rgba(18,63,70,0.04)]">
-                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-slate-950 text-sm font-semibold text-white">
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-slate-950 text-sm font-semibold text-on-ember">
                   0{index + 1}
                 </div>
                 <p className="text-base leading-7 text-slate-700">{step}</p>

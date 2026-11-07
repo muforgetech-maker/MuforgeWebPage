@@ -83,7 +83,7 @@ export function PortfolioGrid() {
             onClick={() => setActiveCategory(category)}
             className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
               activeCategory === category
-              ? "border-[var(--button)] bg-[var(--button)] text-white"
+              ? "border-[var(--button)] bg-[var(--button)] text-on-ember"
               : "border-[var(--border)] bg-white text-[var(--body)] hover:border-[var(--accent)] hover:text-[var(--heading)]"
             }`}
             aria-pressed={activeCategory === category}
@@ -98,7 +98,7 @@ export function PortfolioGrid() {
           <article key={project.title} className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_20px_50px_rgba(18,63,70,0.06)]">
             <div className="relative h-56 overflow-hidden">
               <Image src={project.image} alt={project.title} width={900} height={700} className="h-full w-full object-cover transition duration-500 hover:scale-105" />
-              <span className="absolute left-4 top-4 rounded-full bg-[var(--heading)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white">
+              <span className="absolute left-4 top-4 rounded-control bg-ember px-3 py-1 text-2xs font-semibold uppercase text-on-ember">
                 {project.category}
               </span>
             </div>

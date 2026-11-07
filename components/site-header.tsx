@@ -62,7 +62,7 @@ export function SiteHeader() {
           </a>
           <Link
             href="/contact"
-            className="inline-flex items-center gap-2 rounded-full bg-[var(--button)] px-4 py-2 text-sm font-medium text-white transition hover:bg-[var(--button-hover)]"
+            className="inline-flex items-center gap-2 rounded-full bg-[var(--button)] px-4 py-2 text-sm font-medium text-on-ember transition hover:bg-[var(--button-hover)]"
           >
             Discuss Your Project
             <ArrowRight size={15} />
@@ -109,7 +109,7 @@ export function SiteHeader() {
               <Link
                 href="/contact"
                 onClick={() => setMobileOpen(false)}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--button)] px-4 py-2 text-sm font-medium text-white transition hover:bg-[var(--button-hover)]"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--button)] px-4 py-2 text-sm font-medium text-on-ember transition hover:bg-[var(--button-hover)]"
               >
                 Contact Us
               </Link>
