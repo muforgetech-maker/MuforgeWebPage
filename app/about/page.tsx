@@ -1,6 +1,18 @@
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, BriefcaseBusiness, CheckCircle2, MessageSquareText, ShieldCheck, Workflow } from "lucide-react";
+import {
+  ArrowRight,
+  BriefcaseBusiness,
+  CheckCircle2,
+  MessageSquareText,
+  ShieldCheck,
+  Workflow,
+} from "lucide-react";
+
+const approach = [
+  "Clear understanding of your current challenge and desired outcome.",
+  "Solutions shaped around your business goals and timeline.",
+  "Honest communication, thoughtful execution, and dependable follow-through.",
+];
 
 const principles = [
   {
@@ -32,75 +44,88 @@ export const metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="section-shell py-16 sm:py-20">
-      <div className="max-w-3xl">
-        <span className="eyebrow">About MuForge</span>
-        <h1 className="mt-6 text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
-          We build practical technology that supports business growth.
-        </h1>
-        <p className="mt-5 text-lg leading-8 text-slate-600">
-          MuForge is a technology and digital solutions company focused on helping businesses and learners move forward with confidence.
-        </p>
-      </div>
+    <>
+      <section className="py-section">
+        <div className="section-shell">
+          <div className="max-w-measure">
+            <span className="eyebrow">About MuForge</span>
+            <h1 className="mt-5 text-h1 font-semibold text-text">
+              We build practical technology that supports business growth.
+            </h1>
+            <p className="mt-5 text-lg text-text-muted">
+              MuForge is a technology and digital solutions company focused on helping businesses
+              and learners move forward with confidence.
+            </p>
+          </div>
 
-      <div className="mt-12 grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-        <div className="overflow-hidden rounded-[30px] border border-slate-200 bg-white p-3 shadow-[0_25px_70px_rgba(18,63,70,0.06)]">
-          <Image
-            src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=80"
-            alt="Business and technology planning session"
-            width={1200}
-            height={900}
-            className="h-[420px] w-full rounded-[22px] object-cover"
-          />
-        </div>
-        <div className="space-y-5 text-base leading-8 text-slate-600">
-          <p>
-            MuForge works with businesses that need dependable digital support, from custom software and websites to digital marketing and professional content support.
-          </p>
-          <p>
-            Our mission is simple: turn ideas into useful technology. We focus on practical outcomes, clean execution, and everyday business value rather than unnecessary complexity.
-          </p>
-          <p>
-            We understand that every business has different priorities. That is why our process is centered on listening carefully, understanding your goals, and building the right solution for your situation.
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-16 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-        {principles.map(({ title, description, icon: Icon }) => (
-          <div key={title} className="premium-card p-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-900">
-              <Icon size={20} />
+          <div className="mt-12 grid gap-12 lg:grid-cols-2 lg:items-start">
+            <div className="space-y-4 text-base text-text-muted">
+              <p>
+                MuForge works with businesses that need dependable digital support, from custom
+                software and websites to digital marketing and professional content support.
+              </p>
+              <p>
+                Our mission is simple: turn ideas into useful technology. We focus on practical
+                outcomes, clean execution, and everyday business value rather than unnecessary
+                complexity.
+              </p>
+              <p>
+                We understand that every business has different priorities. That is why our
+                process is centered on listening carefully, understanding your goals, and building
+                the right solution for your situation.
+              </p>
             </div>
-            <h3 className="mt-5 text-xl font-semibold text-slate-950">{title}</h3>
-            <p className="mt-3 text-sm leading-7 text-slate-600">{description}</p>
-          </div>
-        ))}
-      </div>
 
-      <div className="mt-16 rounded-[30px] border border-slate-200 bg-[var(--section-bg)] p-8 shadow-[0_25px_70px_rgba(18,63,70,0.08)]">
-        <div className="grid gap-8 lg:grid-cols-[1fr_1fr] lg:items-center">
-          <div>
-            <span className="eyebrow">Our approach</span>
-            <h2 className="mt-5 text-3xl font-semibold tracking-tight text-slate-950">We work closely with clients to make the right decisions.</h2>
+            <div className="rounded-card border border-border bg-surface p-6 lg:p-8">
+              <span className="eyebrow">Our approach</span>
+              <h2 className="mt-5 text-h3 font-semibold text-text">
+                We work closely with clients to make the right decisions.
+              </h2>
+              <ul className="mt-6 space-y-4 text-sm text-text-muted">
+                {approach.map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <CheckCircle2
+                      size={18}
+                      aria-hidden="true"
+                      className="mt-0.5 shrink-0 text-ember"
+                    />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
-          <ul className="space-y-4 text-sm leading-7 text-slate-600">
-            <li className="flex items-start gap-3"><CheckCircle2 size={18} className="mt-1 text-[var(--button)]" /> Clear understanding of your current challenge and desired outcome.</li>
-            <li className="flex items-start gap-3"><CheckCircle2 size={18} className="mt-1 text-[var(--button)]" /> Solutions shaped around your business goals and timeline.</li>
-            <li className="flex items-start gap-3"><CheckCircle2 size={18} className="mt-1 text-[var(--button)]" /> Honest communication, thoughtful execution, and dependable follow-through.</li>
-          </ul>
         </div>
-      </div>
+      </section>
 
-      <div className="mt-16 flex flex-col gap-5 sm:flex-row">
-        <Link href="/services" className="primary-button">
-          Explore services
-          <ArrowRight size={16} />
-        </Link>
-        <Link href="/contact" className="secondary-button">
-          Discuss your requirements
-        </Link>
-      </div>
-    </div>
+      <section className="border-t border-border bg-surface-2 py-section">
+        <div className="section-shell">
+          <h2 className="section-heading">How we work</h2>
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {principles.map(({ title, description, icon: Icon }) => (
+              <div key={title} className="reveal premium-card">
+                <div className="flex size-10 items-center justify-center rounded-control bg-ember-wash text-ember">
+                  <Icon size={20} aria-hidden="true" />
+                </div>
+                <h3 className="mt-5 text-h3 font-semibold text-text">{title}</h3>
+                <p className="mt-2 text-sm text-text-muted">{description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-border py-section">
+        <div className="section-shell flex flex-col gap-3 sm:flex-row">
+          <Link href="/services" className="primary-button">
+            Explore services
+            <ArrowRight size={16} aria-hidden="true" />
+          </Link>
+          <Link href="/contact" className="secondary-button">
+            Discuss your requirements
+          </Link>
+        </div>
+      </section>
+    </>
   );
 }

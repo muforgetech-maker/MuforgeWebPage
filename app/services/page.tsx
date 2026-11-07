@@ -55,59 +55,59 @@ export const metadata = {
 
 export default function ServicesPage() {
   return (
-    <div className="section-shell py-16 sm:py-20">
-      <div className="max-w-3xl">
-        <span className="eyebrow">Services</span>
-        <h1 className="mt-6 text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
-          Practical digital services, shaped around your goals.
-        </h1>
-        <p className="mt-5 text-lg leading-8 text-slate-600">
-          From business software and creative production to career-focused SAP
-          learning, MuForge brings the right expertise to your next step.
-        </p>
-      </div>
+    <>
+      <section className="py-section">
+        <div className="section-shell">
+          <div className="max-w-measure">
+            <span className="eyebrow">Services</span>
+            <h1 className="mt-5 text-h1 font-semibold text-text">
+              Practical digital services, shaped around your goals.
+            </h1>
+            <p className="mt-5 text-lg text-text-muted">
+              From business software and creative production to career-focused SAP learning,
+              MuForge brings the right expertise to your next step.
+            </p>
+          </div>
 
-      <div className="mt-12 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-        {services.map((service, index) => (
-          <article
-            key={service.title}
-            className="flex h-full flex-col overflow-hidden rounded-[28px] border border-[var(--border)] bg-white shadow-[0_20px_50px_rgba(18,63,70,0.06)] transition hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(18,63,70,0.1)]"
-          >
-            <div className="relative aspect-[16/10] overflow-hidden bg-[var(--secondary-bg)]">
-              <Image
-                src={service.image}
-                alt={service.alt}
-                fill
-                sizes="(max-width: 639px) 100vw, (max-width: 1279px) 50vw, 33vw"
-                loading={index < 2 ? "eager" : "lazy"}
-                className="object-cover"
-              />
-            </div>
-            <div className="flex flex-1 flex-col p-6">
-              <h2 className="text-2xl font-semibold text-slate-950">
-                {service.title}
-              </h2>
-              <p className="mt-3 flex-1 text-sm leading-7 text-slate-600">
-                {service.description}
-              </p>
-              <Link
-                href="/contact"
-                className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[var(--button)] transition hover:text-[var(--button-hover)]"
-                aria-label={`Enquire about ${service.title}`}
+          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {services.map((service, index) => (
+              <article
+                key={service.title}
+                className="reveal flex h-full flex-col overflow-hidden rounded-card border border-border bg-surface transition duration-200 hover:-translate-y-0.5 hover:border-border-strong"
               >
-                Explore service
-                <ArrowRight size={16} aria-hidden="true" />
-              </Link>
-            </div>
-          </article>
-        ))}
-      </div>
+                <div className="relative aspect-[16/10] overflow-hidden bg-surface-2">
+                  <Image
+                    src={service.image}
+                    alt={service.alt}
+                    fill
+                    sizes="(max-width: 639px) 92vw, (max-width: 1023px) 46vw, 31vw"
+                    priority={index < 3}
+                    className="object-cover"
+                  />
+                </div>
+                <div className="flex flex-1 flex-col p-6">
+                  <h2 className="text-h3 font-semibold text-text">{service.title}</h2>
+                  <p className="mt-2 flex-1 text-sm text-text-muted">{service.description}</p>
+                  <Link
+                    href="/contact"
+                    className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-ember transition-colors duration-200 hover:text-ember-hover"
+                    aria-label={`Enquire about ${service.title}`}
+                  >
+                    Explore service
+                    <ArrowRight size={16} aria-hidden="true" />
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
 
-      <div className="mt-16 rounded-[30px] border border-[var(--border)] bg-[var(--secondary-bg)] p-8 sm:p-10">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+      <section className="border-t border-border bg-surface-2 py-section">
+        <div className="section-shell flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-center">
           <div>
             <span className="eyebrow">Have a project in mind?</span>
-            <h2 className="mt-5 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+            <h2 className="mt-5 max-w-measure section-heading">
               Let’s find the right solution for your business.
             </h2>
           </div>
@@ -116,7 +116,7 @@ export default function ServicesPage() {
             <ArrowRight size={16} aria-hidden="true" />
           </Link>
         </div>
-      </div>
-    </div>
+      </section>
+    </>
   );
 }
