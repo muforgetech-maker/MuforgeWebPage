@@ -8,57 +8,78 @@ export const metadata = {
 
 export default function ContactPage() {
   return (
-    <div className="section-shell py-16 sm:py-20">
-      <div className="max-w-3xl">
-        <span className="eyebrow">Contact</span>
-        <h1 className="mt-6 text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
-          Tell us what you need, and we’ll help you plan the next step.
-        </h1>
-        <p className="mt-5 text-lg leading-8 text-slate-600">
-          Reach out for custom software, website development, digital growth, creative work, or SAP FICO and SAP MM training.
-        </p>
-      </div>
-
-      <div className="mt-12 grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
-        <div className="space-y-5">
-          <div className="rounded-[30px] border border-slate-200 bg-white p-6 shadow-[0_20px_60px_rgba(18,63,70,0.04)]">
-            <h2 className="text-2xl font-semibold text-slate-950">Direct contact</h2>
-            <ul className="mt-6 space-y-4 text-sm text-slate-600">
-              <li className="flex items-start gap-3">
-                <Mail size={18} className="mt-0.5 text-slate-900" />
-                <a href="mailto:muforgetech@gmail.com" className="transition hover:text-[var(--button-hover)]">
-                  muforgetech@gmail.com
-                </a>
-              </li>
-              <li className="flex items-start gap-3">
-                <Phone size={18} className="mt-0.5 text-slate-900" />
-                <a href="tel:+919790261693" className="transition hover:text-[var(--button-hover)]">
-                  +91 9790261693
-                </a>
-              </li>
-              <li className="flex items-start gap-3">
-                <MessageCircle size={18} className="mt-0.5 text-slate-900" />
-                <a href="https://wa.me/919790261693" target="_blank" rel="noreferrer" className="transition hover:text-[var(--button-hover)]">
-                  WhatsApp chat
-                </a>
-              </li>
-              <li className="flex items-start gap-3">
-                <MapPin size={18} className="mt-0.5 text-slate-900" />
-                <span>Coimbatore, Tamil Nadu, India</span>
-              </li>
-            </ul>
-          </div>
-
-          <div className="rounded-[30px] border border-slate-200 bg-[var(--section-bg)] p-6 shadow-[0_20px_60px_rgba(18,63,70,0.06)]">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-800">Why contact MuForge?</p>
-            <p className="mt-4 text-base leading-7 text-slate-600">
-              We help with business software, websites, digital growth, product visuals, and SAP training enquiries.
-            </p>
-          </div>
+    <section className="py-section">
+      <div className="section-shell">
+        <div className="max-w-measure">
+          <span className="eyebrow">Contact</span>
+          <h1 className="mt-5 text-h1 font-semibold text-text">
+            Tell us what you need, and we’ll help you plan the next step.
+          </h1>
+          <p className="mt-5 text-lg text-text-muted">
+            Reach out for custom software, website development, digital growth, creative work, or
+            SAP FICO and SAP MM training.
+          </p>
         </div>
 
-        <ContactForm />
+        <div className="mt-12 grid gap-4 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+          <div className="grid gap-4">
+            <div className="rounded-card border border-border bg-surface p-6">
+              <h2 className="text-h3 font-semibold text-text">Direct contact</h2>
+              <ul className="mt-5 space-y-4 text-sm text-text-muted">
+                <li className="flex items-start gap-3">
+                  <Mail size={18} aria-hidden="true" className="mt-0.5 shrink-0 text-ember" />
+                  <a
+                    href="mailto:muforgetech@gmail.com"
+                    className="transition-colors duration-200 hover:text-ember"
+                  >
+                    muforgetech@gmail.com
+                  </a>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Phone size={18} aria-hidden="true" className="mt-0.5 shrink-0 text-ember" />
+                  <a
+                    href="tel:+919790261693"
+                    className="font-mono tabular-nums transition-colors duration-200 hover:text-ember"
+                  >
+                    +91 97902 61693
+                  </a>
+                </li>
+                <li className="flex items-start gap-3">
+                  <MessageCircle
+                    size={18}
+                    aria-hidden="true"
+                    className="mt-0.5 shrink-0 text-ember"
+                  />
+                  <a
+                    href="https://wa.me/919790261693"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="transition-colors duration-200 hover:text-ember"
+                  >
+                    WhatsApp chat
+                  </a>
+                </li>
+                <li className="flex items-start gap-3">
+                  <MapPin size={18} aria-hidden="true" className="mt-0.5 shrink-0 text-ember" />
+                  <span>Coimbatore, Tamil Nadu, India</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="rounded-card border border-border bg-surface-2 p-6">
+              <h2 className="text-2xs font-semibold uppercase text-text-muted">
+                Why contact MuForge?
+              </h2>
+              <p className="mt-3 text-sm text-text-muted">
+                We help with business software, websites, digital growth, product visuals, and SAP
+                training enquiries.
+              </p>
+            </div>
+          </div>
+
+          <ContactForm />
+        </div>
       </div>
-    </div>
+    </section>
   );
 }
