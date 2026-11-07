@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
+import { OrderFlowDemo } from "@/components/order-flow-demo";
 import {
   ArrowRight,
-  BadgeCheck,
   BriefcaseBusiness,
   Building2,
   ChartNoAxesCombined,
@@ -18,10 +18,15 @@ import {
   Users,
 } from "lucide-react";
 
-const metrics = [
-  { value: "Custom", label: "business-focused solutions" },
-  { value: "Practical", label: "digital strategy" },
-  { value: "Growth", label: "for modern businesses" },
+// The hero used to carry a statistics-shaped strip reading "Custom /
+// Practical / Growth". MuForge has no track record to quote yet, so it now
+// lists what the company actually does.
+const capabilities = [
+  "Custom software",
+  "Websites",
+  "Digital marketing",
+  "Product visuals",
+  "SAP training",
 ];
 
 const services = [
@@ -127,58 +132,43 @@ const faqs = [
 export default function HomePage() {
   return (
     <>
-      <section className="relative overflow-hidden bg-[var(--background)]">
-        <div className="section-shell relative grid gap-10 py-16 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:py-24">
+      <section className="relative isolate overflow-hidden">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
+          <div className="hero-texture absolute inset-0" />
+          <div className="hero-glow absolute -top-40 right-0 h-[32rem] w-[32rem] rounded-full" />
+          <div className="hero-noise absolute inset-0" />
+        </div>
+
+        <div className="section-shell grid gap-12 py-section lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <div>
-            <span className="eyebrow mb-6">MUFORGE TECHNOLOGY</span>
-            <h1 className="max-w-xl text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
-              Technology That Moves Your Business Forward.
+            <span className="eyebrow mb-5">MuForge Technology</span>
+            <h1 className="text-hero font-semibold text-text">
+              Technology that moves your business forward.
             </h1>
-            <p className="mt-6 max-w-xl text-lg leading-8 text-slate-600">
-              We build practical digital solutions that help businesses operate smarter, work more efficiently, and grow with confidence.
+            <p className="mt-6 max-w-measure text-lg text-text-muted">
+              We build practical digital solutions that help businesses operate smarter, work more
+              efficiently, and grow with confidence.
             </p>
-            <div className="mt-8 flex flex-col gap-4 sm:flex-row">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link href="/contact" className="primary-button">
                 Discuss Your Project
-                <ArrowRight size={16} />
+                <ArrowRight size={16} aria-hidden="true" />
               </Link>
               <Link href="/services" className="secondary-button">
                 Explore Our Services
               </Link>
             </div>
-            <div className="mt-10 grid gap-4 sm:grid-cols-3">
-              {metrics.map((metric) => (
-                <div key={metric.label} className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-[0_12px_32px_rgba(18,63,70,0.06)] backdrop-blur-sm">
-                  <p className="text-xl font-semibold text-slate-900">{metric.value}</p>
-                  <p className="mt-1 text-sm text-slate-600">{metric.label}</p>
-                </div>
+            <ul className="mt-10 flex flex-wrap gap-x-5 gap-y-2 text-sm text-text-muted">
+              {capabilities.map((capability) => (
+                <li key={capability} className="flex items-center gap-2">
+                  <span aria-hidden="true" className="size-1 rounded-full bg-ember" />
+                  {capability}
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
 
-          <div className="relative">
-            <div className="rounded-[30px] border border-slate-200 bg-white p-3 shadow-[0_30px_80px_rgba(18,63,70,0.12)]">
-              <Image
-                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80"
-                alt="Business team discussing digital transformation"
-                width={1200}
-                height={800}
-                priority
-                className="h-[520px] w-full rounded-[24px] object-cover"
-              />
-            </div>
-            <div className="absolute -bottom-5 left-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_16px_40px_rgba(18,63,70,0.1)]">
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-950 text-on-ember">
-                  <BadgeCheck size={18} />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-slate-950">Practical Systems</p>
-                  <p className="text-xs text-slate-600">Built for business clarity</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <OrderFlowDemo />
         </div>
       </section>
 

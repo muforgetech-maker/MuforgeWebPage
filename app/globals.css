@@ -96,10 +96,107 @@ svg {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    /* Delays must go too, or a staggered sequence still waits in silence
+       before snapping into place. */
+    animation-delay: 0s !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ---------------------------------------------------------------------------
+ * Hero texture: a faint grid, one ember glow and a little noise, all masked
+ * so they fade out before they reach the content.
+ * ------------------------------------------------------------------------ */
+
+.hero-texture {
+  background-image:
+    linear-gradient(to right, var(--border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+  background-size: 72px 72px;
+  opacity: 0.5;
+  mask-image: radial-gradient(ellipse 70% 60% at 72% 0%, #000 0%, transparent 60%);
+}
+
+.hero-glow {
+  background: var(--ember-glow);
+  opacity: 0.12;
+  filter: blur(90px);
+}
+
+.hero-noise {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+  opacity: 0.15;
+  mix-blend-mode: overlay;
+}
+
+/* ---------------------------------------------------------------------------
+ * Order-flow demo card. Runs once on load, then rests.
+ * ------------------------------------------------------------------------ */
+
+@keyframes demo-type {
+  from {
+    width: 0;
+  }
+  to {
+    width: var(--chars);
+  }
+}
+
+@keyframes demo-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes demo-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes demo-caret-off {
+  to {
+    border-right-color: transparent;
+  }
+}
+
+.demo-typed {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  vertical-align: bottom;
+  border-right: 2px solid var(--ember);
+  animation:
+    demo-type 1.3s steps(28) both,
+    demo-caret-off 1ms linear 3.5s both;
+}
+
+.demo-step,
+.demo-result {
+  animation: demo-fade-in 320ms var(--ease-out) both;
+}
+
+.demo-step {
+  animation-delay: calc(1.5s + var(--i) * 0.28s);
+}
+
+.demo-result {
+  animation-delay: 2.9s;
+}
+
+.demo-status-done {
+  animation: demo-fade-in 320ms var(--ease-out) 3.3s both;
+}
+
+.demo-status-open {
+  animation: demo-fade-out 200ms linear 3.3s both;
 }
 
 /* ===========================================================================

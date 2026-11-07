@@ -52,13 +52,13 @@ export function SiteHeader() {
             <span className="font-display text-xl font-semibold tracking-tight text-text">
               MuForge
             </span>
-            <span className="mt-1 text-2xs font-medium text-text-muted">
+            <span className="mt-1 hidden whitespace-nowrap text-2xs font-medium text-text-muted sm:block">
               Technology that moves
             </span>
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
+        <nav className="hidden items-center lg:flex" aria-label="Primary">
           {navItems.map((item) => {
             const current = isCurrent(item.href);
             return (
@@ -66,7 +66,7 @@ export function SiteHeader() {
                 key={item.href}
                 href={item.href}
                 aria-current={current ? "page" : undefined}
-                className={`rounded-control px-3 py-2 text-sm font-medium transition-colors duration-200 ${
+                className={`whitespace-nowrap rounded-control px-2.5 py-2 text-sm font-medium transition-colors duration-200 xl:px-3 ${
                   current ? "text-ember" : "text-text-muted hover:text-text"
                 }`}
               >
@@ -80,12 +80,13 @@ export function SiteHeader() {
           <ThemeToggle />
           <a
             href="tel:+919790261693"
-            className="inline-flex items-center gap-2 rounded-control border border-border px-3 py-2 text-sm font-medium text-text-muted transition-colors duration-200 hover:border-border-strong hover:text-text"
+            aria-label="Call MuForge on +91 97902 61693"
+            className="hidden items-center gap-2 whitespace-nowrap rounded-control border border-border px-3 py-2 text-sm font-medium text-text-muted transition-colors duration-200 hover:border-border-strong hover:text-text xl:inline-flex"
           >
             <Phone size={15} aria-hidden="true" />
             <span className="font-mono tabular-nums">+91 97902 61693</span>
           </a>
-          <Link href="/contact" className="primary-button px-4 py-2">
+          <Link href="/contact" className="primary-button whitespace-nowrap px-4 py-2">
             Discuss Your Project
             <ArrowRight size={15} aria-hidden="true" />
           </Link>
