@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
@@ -47,10 +48,20 @@ const services = [
   },
 ];
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Services",
   description:
     "Explore MuForge services in custom software, website development, digital marketing, product photography and editing, and SAP training.",
+  alternates: { canonical: "/services" },
+  openGraph: {
+    title: "Services | MuForge",
+    description:
+      "Explore MuForge services in custom software, website development, digital marketing, product photography and editing, and SAP training.",
+    url: "/services",
+    siteName: "MuForge",
+    locale: "en_IN",
+    type: "website",
+  },
 };
 
 export default function ServicesPage() {

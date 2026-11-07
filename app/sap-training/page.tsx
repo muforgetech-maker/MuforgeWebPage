@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   BookOpen,
@@ -76,10 +77,20 @@ const faqs = [
   },
 ];
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "SAP Training",
   description:
     "MuForge SAP training includes SAP FI and SAP MM programs for students, graduates, and learners seeking practical business system knowledge.",
+  alternates: { canonical: "/sap-training" },
+  openGraph: {
+    title: "SAP Training | MuForge",
+    description:
+      "MuForge SAP training includes SAP FI and SAP MM programs for students, graduates, and learners seeking practical business system knowledge.",
+    url: "/sap-training",
+    siteName: "MuForge",
+    locale: "en_IN",
+    type: "website",
+  },
 };
 
 export default function SAPTrainingPage() {

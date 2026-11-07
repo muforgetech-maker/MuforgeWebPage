@@ -1,9 +1,21 @@
+import type { Metadata } from "next";
 import { ContactForm } from "@/components/contact-form";
 import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Contact",
-  description: "Get in touch with MuForge for custom software, website development, digital marketing, creative services, or SAP FICO and SAP MM training enquiries.",
+  description:
+    "Get in touch with MuForge for custom software, website development, digital marketing, creative services, or SAP FICO and SAP MM training enquiries.",
+  alternates: { canonical: "/contact" },
+  openGraph: {
+    title: "Contact | MuForge",
+    description:
+      "Get in touch with MuForge for custom software, website development, digital marketing, creative services, or SAP FICO and SAP MM training enquiries.",
+    url: "/contact",
+    siteName: "MuForge",
+    locale: "en_IN",
+    type: "website",
+  },
 };
 
 export default function ContactPage() {

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -37,9 +38,20 @@ const principles = [
   },
 ];
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "About",
-  description: "Learn more about MuForge, our business-first approach, and how we help companies and learners with practical digital solutions.",
+  description:
+    "Learn more about MuForge, our business-first approach, and how we help companies and learners with practical digital solutions.",
+  alternates: { canonical: "/about" },
+  openGraph: {
+    title: "About | MuForge",
+    description:
+      "Learn more about MuForge, our business-first approach, and how we help companies and learners with practical digital solutions.",
+    url: "/about",
+    siteName: "MuForge",
+    locale: "en_IN",
+    type: "website",
+  },
 };
 
 export default function AboutPage() {

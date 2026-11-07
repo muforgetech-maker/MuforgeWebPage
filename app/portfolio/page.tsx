@@ -1,8 +1,20 @@
+import type { Metadata } from "next";
 import { PortfolioGrid } from "@/components/portfolio-grid";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Portfolio",
-  description: "Browse MuForge portfolio highlights across software development, website work, business automation, and digital solutions.",
+  description:
+    "Browse MuForge portfolio highlights across software development, website work, business automation, and digital solutions.",
+  alternates: { canonical: "/portfolio" },
+  openGraph: {
+    title: "Portfolio | MuForge",
+    description:
+      "Browse MuForge portfolio highlights across software development, website work, business automation, and digital solutions.",
+    url: "/portfolio",
+    siteName: "MuForge",
+    locale: "en_IN",
+    type: "website",
+  },
 };
 
 export default function PortfolioPage() {

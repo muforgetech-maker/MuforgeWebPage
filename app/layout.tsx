@@ -29,7 +29,7 @@ const geistMono = Geist_Mono({
 const themeScript = `try{var t=localStorage.getItem("mf-theme");if(t==="dark"||t==="light"){document.documentElement.setAttribute("data-theme",t)}}catch(e){}`;
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://muforge.netlify.app"),
+  metadataBase: new URL("https://muforge.in"),
   title: {
     default: "MuForge | Technology That Moves Your Business Forward",
     template: "%s | MuForge",
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     title: "MuForge",
     description:
       "Technology that moves your business forward with practical digital solutions, website development, and SAP training.",
-    url: "https://muforge.netlify.app",
+    url: "/",
     siteName: "MuForge",
     locale: "en_IN",
     type: "website",
@@ -53,9 +53,30 @@ export const metadata: Metadata = {
     title: "MuForge",
     description: "Custom software, website development, and SAP training for business growth.",
   },
-  icons: {
-    icon: "/favicon.svg",
+  // Icons come from the app/icon.svg file convention. The previous override
+  // pointed at an SVG that embedded a PNG with <image href>, which browsers
+  // refuse to load in an icon, so the favicon rendered as a blank square.
+};
+
+// Structured data for a local service business. Only facts already published
+// on the site: no ratings, no review counts, no invented numbers.
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  name: "MuForge",
+  url: "https://muforge.in",
+  description:
+    "Custom software, website development, digital marketing, product photography and SAP FI and MM training.",
+  email: "muforgetech@gmail.com",
+  telephone: "+91-9790261693",
+  areaServed: "IN",
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Coimbatore",
+    addressRegion: "Tamil Nadu",
+    addressCountry: "IN",
   },
+  sameAs: ["https://www.instagram.com/mu.forge/"],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -67,6 +88,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full bg-bg text-text">
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-control focus:bg-ember focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-on-ember"

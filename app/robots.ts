@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: "https://muforge.netlify.app/sitemap.xml",
-    host: "https://muforge.netlify.app",
+    sitemap: "https://muforge.in/sitemap.xml",
+    host: "https://muforge.in",
   };
 }
