@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -153,6 +154,7 @@ const founderSchema = {
   name: "U. Tharun",
   jobTitle: "Founder",
   url: "https://muforge.in/our-story",
+  image: "https://muforge.in/tharun-headshot.png",
   worksFor: {
     "@type": "Organization",
     name: "MuForge",
@@ -189,22 +191,23 @@ export default function OurStoryPage() {
             </p>
           </div>
 
-          {/* Monogram tile until a photograph of the founder is available.
-              It is designed to stand on its own, not as a visible placeholder. */}
           <figure className="rounded-card border border-border bg-surface">
             <div className="flex items-center gap-5 p-6">
-              <span
-                aria-hidden="true"
-                className="flex size-20 shrink-0 items-center justify-center rounded-card border border-border bg-surface-2 font-display text-3xl font-semibold tracking-tight text-text"
-              >
-                UT
-              </span>
+              <Image
+                src="/tharun-headshot.png"
+                alt="U. Tharun, founder of MuForge"
+                width={160}
+                height={160}
+                priority
+                className="size-20 shrink-0 rounded-card border border-border bg-surface-2 object-cover object-top"
+              />
               <figcaption>
                 <p className="text-h3 font-semibold text-text">U. Tharun</p>
                 <p className="mt-1 text-sm text-text-muted">Founder, MuForge</p>
                 <p className="mt-3 inline-flex rounded-control bg-ember-wash px-2 py-1 text-2xs font-semibold uppercase text-ember">
                   SAP FICO Global Certified
                 </p>
+
               </figcaption>
             </div>
             <dl className="grid grid-cols-2 gap-4 border-t border-border px-6 py-4">
