@@ -203,7 +203,7 @@ export default function OurStoryPage() {
                 <p className="text-h3 font-semibold text-text">U. Tharun</p>
                 <p className="mt-1 text-sm text-text-muted">Founder, MuForge</p>
                 <p className="mt-3 inline-flex rounded-control bg-ember-wash px-2 py-1 text-2xs font-semibold uppercase text-ember">
-                  SAP Global Certification
+                  SAP FICO Global Certified
                 </p>
               </figcaption>
             </div>

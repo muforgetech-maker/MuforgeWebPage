@@ -5,10 +5,16 @@ import {
   CheckCircle2,
   ChevronDown,
   GraduationCap,
+  Mail,
   MessageCircle,
   Users,
 } from "lucide-react";
 import { OrderFlowDemo } from "@/components/order-flow-demo";
+
+const sapEmail = "sap@muforge.in";
+const sapMailto = `mailto:${sapEmail}?subject=${encodeURIComponent(
+  "SAP training enrollment enquiry",
+)}`;
 
 const courseTopics = [
   "Introduction to SAP business processes",
@@ -73,7 +79,7 @@ const faqs = [
   {
     question: "How do I enroll?",
     answer:
-      "You can contact us via WhatsApp or send an enquiry through the contact page to discuss the intake details.",
+      "You can contact us via WhatsApp, email sap@muforge.in, or send an enquiry through the contact page to discuss the intake details.",
   },
 ];
 
@@ -107,7 +113,7 @@ export default function SAPTrainingPage() {
               MuForge offers hands-on SAP training for college students, fresh graduates, and
               individual learners who want practical business-process knowledge.
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <a
                 href="https://wa.me/919790261693"
                 target="_blank"
@@ -116,6 +122,10 @@ export default function SAPTrainingPage() {
               >
                 WhatsApp enrollment
                 <MessageCircle size={16} aria-hidden="true" />
+              </a>
+              <a href={sapMailto} className="secondary-button">
+                Email enrollment
+                <Mail size={16} aria-hidden="true" />
               </a>
               <Link href="/contact" className="secondary-button">
                 Enquire now
@@ -249,6 +259,9 @@ export default function SAPTrainingPage() {
               className="secondary-button"
             >
               WhatsApp now
+            </a>
+            <a href={sapMailto} className="secondary-button">
+              Email sap@muforge.in
             </a>
           </div>
         </div>
