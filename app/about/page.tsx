@@ -129,9 +129,12 @@ export default function AboutPage() {
 
       <section className="border-t border-border py-section">
         <div className="section-shell flex flex-col gap-3 sm:flex-row">
-          <Link href="/services" className="primary-button">
-            Explore services
+          <Link href="/our-story" className="primary-button">
+            Read our story
             <ArrowRight size={16} aria-hidden="true" />
+          </Link>
+          <Link href="/services" className="secondary-button">
+            Explore services
           </Link>
           <Link href="/contact" className="secondary-button">
             Discuss your requirements

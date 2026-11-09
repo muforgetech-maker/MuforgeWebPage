@@ -5,6 +5,7 @@ import { AtSign, Mail, MapPin, MessageCircle } from "lucide-react";
 const quickLinks = [
   { href: "/services", label: "Services" },
   { href: "/about", label: "About MuForge" },
+  { href: "/our-story", label: "Our Story" },
   { href: "/portfolio", label: "Portfolio" },
   { href: "/sap-training", label: "SAP Training" },
   { href: "/contact", label: "Contact" },

@@ -121,6 +121,16 @@ export default function SAPTrainingPage() {
                 Enquire now
               </Link>
             </div>
+            <p className="mt-6 text-sm text-text-muted">
+              Our founder took this path himself.{" "}
+              <Link
+                href="/our-story"
+                className="font-semibold text-ember transition-colors duration-200 hover:text-ember-hover"
+              >
+                Read our story
+              </Link>
+              .
+            </p>
           </div>
 
           {/* The order-to-billing flow this programme teaches. */}

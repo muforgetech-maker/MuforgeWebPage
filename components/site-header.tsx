@@ -10,6 +10,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 const navItems = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About" },
+  { href: "/our-story", label: "Our Story" },
   { href: "/services", label: "Services" },
   { href: "/portfolio", label: "Portfolio" },
   { href: "/sap-training", label: "SAP Training" },
@@ -81,7 +82,7 @@ export function SiteHeader() {
           <a
             href="tel:+919790261693"
             aria-label="Call MuForge on +91 97902 61693"
-            className="hidden items-center gap-2 whitespace-nowrap rounded-control border border-border px-3 py-2 text-sm font-medium text-text-muted transition-colors duration-200 hover:border-border-strong hover:text-text xl:inline-flex"
+            className="hidden items-center gap-2 whitespace-nowrap rounded-control border border-border px-3 py-2 text-sm font-medium text-text-muted transition-colors duration-200 hover:border-border-strong hover:text-text 2xl:inline-flex"
           >
             <Phone size={15} aria-hidden="true" />
             <span className="font-mono tabular-nums">+91 97902 61693</span>
