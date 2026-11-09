@@ -2,8 +2,16 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { ProductShootMarquee } from "@/components/product-shoot-marquee";
 
-const services = [
+// Every card shows one photograph, except product photography, which shows the
+// shoot itself as a moving strip.
+type Service = { title: string; description: string } & (
+  | { image: string; alt: string; marquee?: never }
+  | { marquee: true; image?: never; alt?: never }
+);
+
+const services: Service[] = [
   {
     title: "Custom Software Development",
     description:
@@ -29,8 +37,7 @@ const services = [
     title: "Product Photography & Video Editing",
     description:
       "Professional product photography and thoughtful video editing for polished campaigns and online stores.",
-    image: "/assets/services/product-photography.jpg",
-    alt: "Minimalist watches arranged for a product photography session",
+    marquee: true,
   },
   {
     title: "SAP FICO Training",
@@ -87,14 +94,18 @@ export default function ServicesPage() {
                 className="reveal flex h-full flex-col overflow-hidden rounded-card border border-border bg-surface transition duration-200 hover:-translate-y-0.5 hover:border-border-strong"
               >
                 <div className="relative aspect-[16/10] overflow-hidden bg-surface-2">
-                  <Image
-                    src={service.image}
-                    alt={service.alt}
-                    fill
-                    sizes="(max-width: 639px) 92vw, (max-width: 1023px) 46vw, 31vw"
-                    priority={index < 3}
-                    className="object-cover"
-                  />
+                  {service.marquee ? (
+                    <ProductShootMarquee />
+                  ) : (
+                    <Image
+                      src={service.image}
+                      alt={service.alt}
+                      fill
+                      sizes="(max-width: 639px) 92vw, (max-width: 1023px) 46vw, 31vw"
+                      priority={index < 3}
+                      className="object-cover"
+                    />
+                  )}
                 </div>
                 <div className="flex flex-1 flex-col p-6">
                   <h2 className="text-h3 font-semibold text-text">{service.title}</h2>

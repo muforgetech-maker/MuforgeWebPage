@@ -137,6 +137,48 @@ svg {
 }
 
 /* ---------------------------------------------------------------------------
+ * Product-shoot filmstrip. The track carries the photographs twice and slides
+ * by half its own width, so copy two arrives exactly where copy one started.
+ * ------------------------------------------------------------------------ */
+
+@keyframes product-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.product-marquee {
+  overflow: hidden;
+}
+
+.product-marquee-track {
+  width: max-content;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .product-marquee-track {
+    animation: product-marquee 42s linear infinite;
+  }
+
+  /* Hold still while someone is looking at a shot or tabbing through. */
+  .product-marquee:hover .product-marquee-track,
+  .product-marquee:focus-within .product-marquee-track {
+    animation-play-state: paused;
+  }
+}
+
+/* No drifting for anyone who asked for less motion: the strip becomes an
+   ordinary swipeable row instead. */
+@media (prefers-reduced-motion: reduce) {
+  .product-marquee {
+    overflow-x: auto;
+  }
+}
+
+/* ---------------------------------------------------------------------------
  * Order-flow demo card. Runs once on load, then rests.
  * ------------------------------------------------------------------------ */
 
