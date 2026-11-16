@@ -5,6 +5,8 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
+      // The ERP is private; its pages also send noindex headers.
+      disallow: "/admin",
     },
     sitemap: "https://muforge.in/sitemap.xml",
     host: "https://muforge.in",

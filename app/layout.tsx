@@ -1,8 +1,5 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Geist, Geist_Mono } from "next/font/google";
-import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
-import { WhatsAppFloat } from "@/components/whatsapp-float";
 import "./globals.css";
 
 const bricolage = Bricolage_Grotesque({
@@ -58,27 +55,9 @@ export const metadata: Metadata = {
   // refuse to load in an icon, so the favicon rendered as a blank square.
 };
 
-// Structured data for a local service business. Only facts already published
-// on the site: no ratings, no review counts, no invented numbers.
-const organizationSchema = {
-  "@context": "https://schema.org",
-  "@type": "ProfessionalService",
-  name: "MuForge",
-  url: "https://muforge.in",
-  description:
-    "Custom software, website development, digital marketing, product photography and SAP FI and MM training.",
-  email: "muforgetech@gmail.com",
-  telephone: "+91-9790261693",
-  areaServed: "IN",
-  address: {
-    "@type": "PostalAddress",
-    addressLocality: "Coimbatore",
-    addressRegion: "Tamil Nadu",
-    addressCountry: "IN",
-  },
-  sameAs: ["https://www.instagram.com/mu.forge/"],
-};
-
+// The document shell only. The public site's header, footer and structured
+// data live in app/(site)/layout.tsx; the ERP brings its own chrome under
+// app/admin, so neither leaks into the other.
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
@@ -88,24 +67,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full bg-bg text-text">
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
-        />
-        <a
-          href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-control focus:bg-ember focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-on-ember"
-        >
-          Skip to content
-        </a>
-        <div className="flex min-h-screen flex-col">
-          <SiteHeader />
-          <main id="main" className="flex-1">
-            {children}
-          </main>
-          <SiteFooter />
-          <WhatsAppFloat />
-        </div>
+        {children}
       </body>
     </html>
   );

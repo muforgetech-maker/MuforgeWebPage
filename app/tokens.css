@@ -38,6 +38,22 @@
   --ember-wash: rgba(190, 63, 11, 0.08); /* tint for chips and hover states */
   --steel: #0f766e;
   --danger: #b91c1c;
+  --steel-wash: rgba(15, 118, 110, 0.1); /* ERP status chips: paid */
+  --danger-wash: rgba(185, 28, 28, 0.08); /* ERP status chips: overdue */
+
+  /* Chart series, validated as a pair against --surface in each mode
+     (dataviz validator: lightness band, chroma floor, CVD ΔE ≥ 12.9). The
+     brand steel is too grey to carry a mark, so money-in uses a richer teal. */
+  --viz-in: #008f80;
+  --viz-out: #be3f0b;
+
+  /* Paper — the invoice document. Deliberately absent from the dark blocks:
+     an invoice is a printed page, so it reads as one on screen too. */
+  --paper: #ffffff;
+  --paper-text: #14161b;
+  --paper-muted: #565b66;
+  --paper-border: #e4ded5;
+  --paper-accent: #be3f0b;
 
   /* Elevation — one soft level only -------------------------------------- */
   --shadow-soft: 0 1px 2px rgba(20, 22, 27, 0.04), 0 12px 32px rgba(20, 22, 27, 0.06);
@@ -63,6 +79,10 @@
     --ember-wash: rgba(251, 122, 60, 0.12);
     --steel: #2dd4bf;
     --danger: #f87171;
+    --steel-wash: rgba(45, 212, 191, 0.12);
+    --danger-wash: rgba(248, 113, 113, 0.12);
+    --viz-in: #14a594;
+    --viz-out: #e5642a;
 
     --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.45);
   }
@@ -87,6 +107,10 @@
   --ember-wash: rgba(251, 122, 60, 0.12);
   --steel: #2dd4bf;
   --danger: #f87171;
+  --steel-wash: rgba(45, 212, 191, 0.12);
+  --danger-wash: rgba(248, 113, 113, 0.12);
+  --viz-in: #14a594;
+  --viz-out: #e5642a;
 
   --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.45);
 }
@@ -110,6 +134,15 @@
   --color-ember-wash: var(--ember-wash);
   --color-steel: var(--steel);
   --color-danger: var(--danger);
+  --color-viz-in: var(--viz-in);
+  --color-viz-out: var(--viz-out);
+  --color-steel-wash: var(--steel-wash);
+  --color-danger-wash: var(--danger-wash);
+  --color-paper: var(--paper);
+  --color-paper-text: var(--paper-text);
+  --color-paper-muted: var(--paper-muted);
+  --color-paper-border: var(--paper-border);
+  --color-paper-accent: var(--paper-accent);
 
   /* Type ----------------------------------------------------------------- */
   --font-display: var(--font-bricolage), "Segoe UI", system-ui, sans-serif;

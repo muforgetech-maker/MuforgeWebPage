@@ -279,6 +279,69 @@ svg {
     @apply inline-flex items-center justify-center gap-2 rounded-control border border-border-strong bg-transparent px-5 py-3 text-sm font-semibold text-text transition-colors duration-200 hover:bg-surface-2;
   }
 
+  /* ERP ------------------------------------------------------------------
+     Dense, tabular admin surfaces built from the same tokens as the site. */
+
+  .erp-card {
+    @apply rounded-card border border-border bg-surface;
+  }
+
+  .erp-label {
+    @apply mb-1.5 block text-sm font-medium text-text;
+  }
+
+  .erp-control {
+    @apply w-full rounded-control border border-border-strong bg-surface px-3 py-2 text-sm text-text transition-colors duration-200 placeholder:text-text-muted hover:border-text-muted disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .erp-control[aria-invalid="true"] {
+    @apply border-danger;
+  }
+
+  .erp-hint {
+    @apply mt-1.5 text-xs text-text-muted;
+  }
+
+  .erp-error {
+    @apply mt-1.5 text-xs font-medium text-danger;
+  }
+
+  .erp-table {
+    @apply w-full border-collapse text-sm;
+  }
+
+  .erp-table th {
+    @apply whitespace-nowrap border-b border-border px-4 py-2.5 text-left text-2xs font-semibold uppercase text-text-muted;
+  }
+
+  .erp-table td {
+    @apply border-b border-border px-4 py-3 align-top text-text;
+  }
+
+  .erp-table tbody tr:last-child td {
+    @apply border-b-0;
+  }
+
+  .erp-num {
+    @apply whitespace-nowrap text-right font-mono tabular-nums;
+  }
+
+  .erp-button {
+    @apply inline-flex items-center justify-center gap-2 rounded-control bg-ember px-4 py-2 text-sm font-semibold text-on-ember transition-colors duration-200 hover:bg-ember-hover disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .erp-button-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-control border border-border-strong bg-surface px-4 py-2 text-sm font-semibold text-text transition-colors duration-200 hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .erp-button-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-control border border-danger/50 bg-surface px-4 py-2 text-sm font-semibold text-danger transition-colors duration-200 hover:bg-danger-wash disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .erp-link {
+    @apply font-medium text-text underline decoration-border-strong underline-offset-4 transition-colors duration-200 hover:text-ember hover:decoration-ember;
+  }
+
   /* The steel monogram reads dark-on-light; lift it slightly on dark
      surfaces. Remove once the SVG logo lands. */
   .logo-mark {
@@ -313,5 +376,22 @@ svg {
 
   :root:not([data-theme="light"]) .icon-when-dark {
     display: block;
+  }
+}
+
+/* ===========================================================================
+ * Printing. Only the ERP prints anything meaningful: an invoice page hides
+ * its chrome with print:hidden and the document fills an A4 sheet.
+ * ======================================================================== */
+
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  html,
+  body {
+    background: var(--paper);
   }
 }
