@@ -49,8 +49,8 @@ export async function listPayments(filter: { from?: string; to?: string; query?:
        FROM payments p
        JOIN invoices i ON i.id = p.invoice_id
        JOIN clients c ON c.id = i.client_id
-      WHERE (@from IS NULL OR p.paid_on >= @from)
-        AND (@to IS NULL OR p.paid_on <= @to)
+      WHERE (@from::text IS NULL OR p.paid_on >= @from)
+        AND (@to::text IS NULL OR p.paid_on <= @to)
         AND (i.number ILIKE @like ESCAPE '\\' OR c.name ILIKE @like ESCAPE '\\'
              OR p.reference ILIKE @like ESCAPE '\\')
       ORDER BY p.paid_on DESC, p.id DESC`,

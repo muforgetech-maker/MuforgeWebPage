@@ -199,9 +199,9 @@ export async function listInvoices(filter: InvoiceFilter = {}): Promise<InvoiceL
        JOIN clients c ON c.id = i.client_id
        LEFT JOIN (SELECT invoice_id, SUM(amount_paise) AS paid FROM payments GROUP BY invoice_id) p
               ON p.invoice_id = i.id
-      WHERE (@clientId IS NULL OR i.client_id = @clientId)
-        AND (@from IS NULL OR i.issue_date >= @from)
-        AND (@to IS NULL OR i.issue_date <= @to)
+      WHERE (@clientId::int IS NULL OR i.client_id = @clientId)
+        AND (@from::text IS NULL OR i.issue_date >= @from)
+        AND (@to::text IS NULL OR i.issue_date <= @to)
         AND (COALESCE(i.number, '') ILIKE @like ESCAPE '\\' OR c.name ILIKE @like ESCAPE '\\')
       ORDER BY i.issue_date DESC, i.id DESC`,
     {
@@ -245,8 +245,12 @@ export type RegisterRow = {
 export async function invoiceRegister(from: string, to: string): Promise<RegisterRow[]> {
   return await all<RegisterRow>(
     `SELECT i.number, i.status, i.issue_date AS "issueDate", i.due_date AS "dueDate",
-            COALESCE(json_extract(i.bill_to_json, '$.name'), c.name) AS "clientName",
-            COALESCE(json_extract(i.bill_to_json, '$.gstin'), c.gstin) AS "clientGstin",
+            -- bill_to_json is the snapshot taken when the invoice was issued,
+            -- so the register shows the details it actually went out with.
+            -- It is a text column and NULL on drafts; NULL::jsonb ->> 'x' is
+            -- NULL, so COALESCE still falls back to the live client.
+            COALESCE(i.bill_to_json::jsonb ->> 'name', c.name) AS "clientName",
+            COALESCE(i.bill_to_json::jsonb ->> 'gstin', c.gstin) AS "clientGstin",
             i.place_of_supply AS "placeOfSupply", i.subtotal_paise AS "subtotalPaise",
             i.cgst_paise AS "cgstPaise", i.sgst_paise AS "sgstPaise", i.igst_paise AS "igstPaise",
             i.round_off_paise AS "roundOffPaise", i.total_paise AS "totalPaise",

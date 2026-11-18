@@ -196,7 +196,7 @@ export async function topClients(from: string, to: string, limit = 5): Promise<C
             COUNT(*) AS "invoiceCount"
        FROM invoices i JOIN clients c ON c.id = i.client_id
       WHERE i.status = 'issued' AND i.issue_date BETWEEN ? AND ?
-      GROUP BY c.id ORDER BY salesPaise DESC LIMIT ?`,
+      GROUP BY c.id ORDER BY "salesPaise" DESC LIMIT ?`,
     from,
     to,
     limit,
@@ -208,7 +208,7 @@ export type ExpenseCategoryTotal = { category: string; totalPaise: number };
 export async function expensesByCategory(from: string, to: string): Promise<ExpenseCategoryTotal[]> {
   return await all<ExpenseCategoryTotal>(
     `SELECT category, SUM(amount_paise) AS "totalPaise" FROM expenses
-      WHERE spent_on BETWEEN ? AND ? GROUP BY category ORDER BY totalPaise DESC`,
+      WHERE spent_on BETWEEN ? AND ? GROUP BY category ORDER BY "totalPaise" DESC`,
     from,
     to,
   );

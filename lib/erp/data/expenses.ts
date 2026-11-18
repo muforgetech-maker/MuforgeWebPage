@@ -51,9 +51,9 @@ export async function listExpenses(
   const like = `%${(filter.query ?? "").replace(/[\\%_]/g, "\\$&")}%`;
   return await all<Expense>(
     `SELECT ${EXPENSE_COLUMNS} FROM expenses
-      WHERE (@from IS NULL OR spent_on >= @from)
-        AND (@to IS NULL OR spent_on <= @to)
-        AND (@category IS NULL OR category = @category)
+      WHERE (@from::text IS NULL OR spent_on >= @from)
+        AND (@to::text IS NULL OR spent_on <= @to)
+        AND (@category::text IS NULL OR category = @category)
         AND (description ILIKE @like ESCAPE '\\' OR vendor ILIKE @like ESCAPE '\\'
              OR reference ILIKE @like ESCAPE '\\')
       ORDER BY spent_on DESC, id DESC`,
