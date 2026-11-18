@@ -1,6 +1,8 @@
 import "server-only";
 import { AsyncLocalStorage } from "node:async_hooks";
+import { rootCertificates } from "node:tls";
 import { Pool, types, type PoolClient, type QueryResultRow } from "pg";
+import { SUPABASE_ROOT_CA_2021 } from "@/lib/erp/supabase-ca";
 
 /*
  * One PostgreSQL database holds all ERP data, hosted on Supabase.
@@ -66,13 +68,13 @@ function open(): Store {
     max: Number(process.env.ERP_DB_POOL_MAX ?? 3),
     idleTimeoutMillis: 10_000,
     connectionTimeoutMillis: 15_000,
-    // Supabase terminates TLS with a publicly trusted certificate. The escape
-    // hatch exists for self-hosted Postgres behind a private CA; leaving it
-    // unset keeps the certificate checked.
-    ssl:
-      process.env.ERP_DB_SSL_INSECURE === "1"
-        ? { rejectUnauthorized: false }
-        : { rejectUnauthorized: true },
+    // Supabase's pooler presents a certificate from their own CA, so that
+    // root is trusted alongside the system ones. Both are offered, so this
+    // keeps working if they move to a publicly trusted certificate.
+    ssl: {
+      ca: [SUPABASE_ROOT_CA_2021, ...rootCertificates],
+      rejectUnauthorized: true,
+    },
   });
 
   // A dead socket must never take the process down with it.

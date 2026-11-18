@@ -160,9 +160,10 @@ export async function ensureBootstrapAdmin() {
   const email = process.env.ERP_ADMIN_EMAIL!.trim().toLowerCase();
   const name = process.env.ERP_ADMIN_NAME?.trim() || "Administrator";
   const passwordHash = await hashPassword(process.env.ERP_ADMIN_PASSWORD!);
-  // OR IGNORE: two first logins racing each other create one account, not an error.
+  // DO NOTHING: two first logins racing each other create one account, not an error.
   await run(
-    "INSERT OR IGNORE INTO users (email, name, password_hash) VALUES (?, ?, ?)",
+    `INSERT INTO users (email, name, password_hash) VALUES (?, ?, ?)
+     ON CONFLICT (email) DO NOTHING`,
     email,
     name,
     passwordHash,

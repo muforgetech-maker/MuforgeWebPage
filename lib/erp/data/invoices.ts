@@ -358,7 +358,8 @@ async function nextInvoiceNumber(prefix: string, issueDate: string) {
   const fy = financialYear(issueDate);
   const row = await one<{ lastNumber: number }>(
     `INSERT INTO invoice_sequences (financial_year, last_number) VALUES (?, 1)
-     ON CONFLICT (financial_year) DO UPDATE SET last_number = last_number + 1
+     ON CONFLICT (financial_year)
+       DO UPDATE SET last_number = invoice_sequences.last_number + 1
      RETURNING last_number AS "lastNumber"`,
     fy,
   );
