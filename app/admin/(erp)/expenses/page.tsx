@@ -19,7 +19,7 @@ export default async function ExpensesPage({ searchParams }: PageProps<"/admin/e
   const params = await searchParams;
   const period = resolvePeriod(params, todayIST(), "month");
   const category = expenseCategories.find((c) => c === params.category) ?? "";
-  const expenses = listExpenses({ from: period.from, to: period.to, category });
+  const expenses = await listExpenses({ from: period.from, to: period.to, category });
 
   const total = expenses.reduce((sum, e) => sum + e.amountPaise, 0);
   const gst = expenses.reduce((sum, e) => sum + e.gstPaise, 0);

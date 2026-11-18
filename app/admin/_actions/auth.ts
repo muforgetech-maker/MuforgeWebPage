@@ -31,11 +31,11 @@ export async function login(_state: ActionState, formData: FormData): Promise<Ac
   await ensureBootstrapAdmin();
 
   const ip = clientIp(await headers());
-  if (isLoginLocked(email, ip)) {
+  if (await isLoginLocked(email, ip)) {
     return errorState("Too many failed attempts. Wait 15 minutes, then try again.");
   }
 
-  const user = one<{ id: number; password_hash: string; active: number }>(
+  const user = await one<{ id: number; password_hash: string; active: number }>(
     "SELECT id, password_hash, active FROM users WHERE email = ?",
     email,
   );
@@ -43,20 +43,20 @@ export async function login(_state: ActionState, formData: FormData): Promise<Ac
   const passwordOk = await verifyPassword(password, user?.password_hash ?? (await getDummyHash()));
 
   if (!user || !passwordOk || user.active !== 1) {
-    recordLoginFailure(email, ip);
+    await recordLoginFailure(email, ip);
     return errorState(GENERIC_FAILURE);
   }
 
-  clearLoginFailures(email);
-  run("UPDATE users SET last_login_at = ? WHERE id = ?", new Date().toISOString(), user.id);
+  await clearLoginFailures(email);
+  await run("UPDATE users SET last_login_at = ? WHERE id = ?", new Date().toISOString(), user.id);
   await createSession(user.id);
-  audit(user.id, "login", "user", user.id);
+  await audit(user.id, "login", "user", user.id);
   redirect(next);
 }
 
 export async function logout() {
   const user = await getCurrentAdmin();
   await destroySession();
-  if (user) audit(user.id, "logout", "user", user.id);
+  if (user) await audit(user.id, "logout", "user", user.id);
   redirect(LOGIN_PATH);
 }

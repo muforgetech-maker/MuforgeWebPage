@@ -28,7 +28,7 @@ export default async function InvoicesPage({ searchParams }: PageProps<"/admin/i
   const query = typeof params.q === "string" ? params.q.slice(0, 100) : "";
   const status = tabs.find((tab) => tab.value === params.status)?.value ?? "all";
 
-  const all = listInvoices({ query });
+  const all = await listInvoices({ query });
   const counts = new Map<string, number>();
   for (const invoice of all) counts.set(invoice.displayStatus, (counts.get(invoice.displayStatus) ?? 0) + 1);
   const invoices = status === "all" ? all : all.filter((invoice) => invoice.displayStatus === status);

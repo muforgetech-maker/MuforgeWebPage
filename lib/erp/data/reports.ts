@@ -23,27 +23,27 @@ export type PeriodSummary = {
   netCashPaise: number;
 };
 
-export function periodSummary(from: string, to: string): PeriodSummary {
-  const sales = one<{ n: number; total: number; taxable: number; tax: number }>(
+export async function periodSummary(from: string, to: string): Promise<PeriodSummary> {
+  const sales = (await one<{ n: number; total: number; taxable: number; tax: number }>(
     `SELECT COUNT(*) AS n, COALESCE(SUM(total_paise), 0) AS total,
             COALESCE(SUM(subtotal_paise), 0) AS taxable,
             COALESCE(SUM(cgst_paise + sgst_paise + igst_paise), 0) AS tax
        FROM invoices WHERE status = 'issued' AND issue_date BETWEEN ? AND ?`,
     from,
     to,
-  )!;
-  const receipts = one<{ cash: number; tds: number }>(
+  ))!;
+  const receipts = (await one<{ cash: number; tds: number }>(
     `SELECT COALESCE(SUM(CASE WHEN method <> @tds THEN amount_paise END), 0) AS cash,
             COALESCE(SUM(CASE WHEN method = @tds THEN amount_paise END), 0) AS tds
        FROM payments WHERE paid_on BETWEEN @from AND @to`,
     { tds: TDS_METHOD, from, to },
-  )!;
-  const spend = one<{ total: number; gst: number }>(
+  ))!;
+  const spend = (await one<{ total: number; gst: number }>(
     `SELECT COALESCE(SUM(amount_paise), 0) AS total, COALESCE(SUM(gst_paise), 0) AS gst
        FROM expenses WHERE spent_on BETWEEN ? AND ?`,
     from,
     to,
-  )!;
+  ))!;
   return {
     invoiceCount: sales.n,
     salesPaise: sales.total,
@@ -65,26 +65,26 @@ export type MonthRow = {
 };
 
 /** Month-by-month figures, including empty months, oldest first. */
-export function monthlyTrend(from: string, to: string): MonthRow[] {
+export async function monthlyTrend(from: string, to: string): Promise<MonthRow[]> {
   const byMonth = new Map<string, MonthRow>();
   for (let month = from.slice(0, 7); month <= to.slice(0, 7); month = shiftMonth(`${month}-01`, 1).slice(0, 7)) {
     byMonth.set(month, { month, salesPaise: 0, collectedPaise: 0, expensesPaise: 0 });
   }
 
-  const sales = all<{ month: string; total: number }>(
+  const sales = await all<{ month: string; total: number }>(
     `SELECT substr(issue_date, 1, 7) AS month, SUM(total_paise) AS total FROM invoices
       WHERE status = 'issued' AND issue_date BETWEEN ? AND ? GROUP BY month`,
     from,
     to,
   );
-  const collected = all<{ month: string; total: number }>(
+  const collected = await all<{ month: string; total: number }>(
     `SELECT substr(paid_on, 1, 7) AS month, SUM(amount_paise) AS total FROM payments
       WHERE method <> ? AND paid_on BETWEEN ? AND ? GROUP BY month`,
     TDS_METHOD,
     from,
     to,
   );
-  const expenses = all<{ month: string; total: number }>(
+  const expenses = await all<{ month: string; total: number }>(
     `SELECT substr(spent_on, 1, 7) AS month, SUM(amount_paise) AS total FROM expenses
       WHERE spent_on BETWEEN ? AND ? GROUP BY month`,
     from,
@@ -107,16 +107,16 @@ export type GstMonthRow = {
 };
 
 /** Output GST on invoices against input GST on expenses, by month. */
-export function gstSummary(from: string, to: string): GstMonthRow[] {
-  const output = all<Omit<GstMonthRow, "inputTaxPaise">>(
-    `SELECT substr(issue_date, 1, 7) AS month, SUM(subtotal_paise) AS taxablePaise,
-            SUM(cgst_paise) AS cgstPaise, SUM(sgst_paise) AS sgstPaise, SUM(igst_paise) AS igstPaise
+export async function gstSummary(from: string, to: string): Promise<GstMonthRow[]> {
+  const output = await all<Omit<GstMonthRow, "inputTaxPaise">>(
+    `SELECT substr(issue_date, 1, 7) AS month, SUM(subtotal_paise) AS "taxablePaise",
+            SUM(cgst_paise) AS "cgstPaise", SUM(sgst_paise) AS "sgstPaise", SUM(igst_paise) AS "igstPaise"
        FROM invoices WHERE status = 'issued' AND issue_date BETWEEN ? AND ?
       GROUP BY month`,
     from,
     to,
   );
-  const input = all<{ month: string; gst: number }>(
+  const input = await all<{ month: string; gst: number }>(
     `SELECT substr(spent_on, 1, 7) AS month, SUM(gst_paise) AS gst FROM expenses
       WHERE spent_on BETWEEN ? AND ? GROUP BY month`,
     from,
@@ -152,12 +152,12 @@ export type OpenInvoice = {
 };
 
 /** Every issued invoice with money still owed, most overdue first. */
-export function openInvoices(): OpenInvoice[] {
+export async function openInvoices(): Promise<OpenInvoice[]> {
   const today = todayIST();
-  const rows = all<Omit<OpenInvoice, "daysOverdue">>(
-    `SELECT i.id, i.number, c.name AS clientName, i.issue_date AS issueDate,
-            i.due_date AS dueDate, i.total_paise AS totalPaise,
-            i.total_paise - COALESCE(p.paid, 0) AS balancePaise
+  const rows = await all<Omit<OpenInvoice, "daysOverdue">>(
+    `SELECT i.id, i.number, c.name AS "clientName", i.issue_date AS "issueDate",
+            i.due_date AS "dueDate", i.total_paise AS "totalPaise",
+            i.total_paise - COALESCE(p.paid, 0) AS "balancePaise"
        FROM invoices i
        JOIN clients c ON c.id = i.client_id
        LEFT JOIN (SELECT invoice_id, SUM(amount_paise) AS paid FROM payments GROUP BY invoice_id) p
@@ -190,10 +190,10 @@ export function receivablesAging(open: OpenInvoice[]): AgingBucket[] {
 
 export type ClientTotal = { clientId: number; clientName: string; salesPaise: number; invoiceCount: number };
 
-export function topClients(from: string, to: string, limit = 5): ClientTotal[] {
-  return all<ClientTotal>(
-    `SELECT c.id AS clientId, c.name AS clientName, SUM(i.total_paise) AS salesPaise,
-            COUNT(*) AS invoiceCount
+export async function topClients(from: string, to: string, limit = 5): Promise<ClientTotal[]> {
+  return await all<ClientTotal>(
+    `SELECT c.id AS "clientId", c.name AS "clientName", SUM(i.total_paise) AS "salesPaise",
+            COUNT(*) AS "invoiceCount"
        FROM invoices i JOIN clients c ON c.id = i.client_id
       WHERE i.status = 'issued' AND i.issue_date BETWEEN ? AND ?
       GROUP BY c.id ORDER BY salesPaise DESC LIMIT ?`,
@@ -205,9 +205,9 @@ export function topClients(from: string, to: string, limit = 5): ClientTotal[] {
 
 export type ExpenseCategoryTotal = { category: string; totalPaise: number };
 
-export function expensesByCategory(from: string, to: string): ExpenseCategoryTotal[] {
-  return all<ExpenseCategoryTotal>(
-    `SELECT category, SUM(amount_paise) AS totalPaise FROM expenses
+export async function expensesByCategory(from: string, to: string): Promise<ExpenseCategoryTotal[]> {
+  return await all<ExpenseCategoryTotal>(
+    `SELECT category, SUM(amount_paise) AS "totalPaise" FROM expenses
       WHERE spent_on BETWEEN ? AND ? GROUP BY category ORDER BY totalPaise DESC`,
     from,
     to,
@@ -224,9 +224,9 @@ export type ActivityRow = {
   summary: string;
 };
 
-export function recentActivity(limit = 100): ActivityRow[] {
-  return all<ActivityRow>(
-    `SELECT a.id, a.at, u.name AS userName, a.action, a.entity, a.entity_id AS entityId, a.summary
+export async function recentActivity(limit = 100): Promise<ActivityRow[]> {
+  return await all<ActivityRow>(
+    `SELECT a.id, a.at, u.name AS "userName", a.action, a.entity, a.entity_id AS "entityId", a.summary
        FROM audit_log a LEFT JOIN users u ON u.id = a.user_id
       ORDER BY a.id DESC LIMIT ?`,
     limit,
@@ -234,8 +234,8 @@ export function recentActivity(limit = 100): ActivityRow[] {
 }
 
 /** The first date anything was recorded, so "All time" starts somewhere real. */
-export function earliestActivity(): string | null {
-  const row = one<{ first: string | null }>(
+export async function earliestActivity(): Promise<string | null> {
+  const row = await one<{ first: string | null }>(
     `SELECT MIN(d) AS first FROM (
        SELECT MIN(issue_date) AS d FROM invoices WHERE status = 'issued'
        UNION ALL SELECT MIN(paid_on) FROM payments

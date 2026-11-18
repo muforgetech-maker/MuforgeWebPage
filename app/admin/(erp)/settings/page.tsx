@@ -10,5 +10,5 @@ export const metadata: Metadata = { title: "Settings" };
 
 export default async function CompanySettingsPage() {
   await requireAdmin();
-  return <CompanyForm settings={getSettings()} />;
+  return <CompanyForm settings={await getSettings()} />;
 }

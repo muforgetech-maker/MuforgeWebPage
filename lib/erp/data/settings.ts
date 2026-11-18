@@ -41,27 +41,27 @@ type SettingsRow = Omit<Settings, "gstRegistered" | "roundOff"> & {
   roundOff: number;
 };
 
-export function getSettings(): Settings {
-  const row = one<SettingsRow>(
-    `SELECT business_name AS businessName, legal_name AS legalName,
-            address_line1 AS addressLine1, address_line2 AS addressLine2, city,
-            state_code AS stateCode, pincode, email, phone, website,
-            gst_registered AS gstRegistered, gstin, pan,
-            bank_account_name AS bankAccountName, bank_account_number AS bankAccountNumber,
-            bank_ifsc AS bankIfsc, bank_name AS bankName, bank_branch AS bankBranch,
-            upi_id AS upiId, invoice_prefix AS invoicePrefix,
-            payment_terms_days AS paymentTermsDays, default_sac AS defaultSac,
-            default_tax_rate_bp AS defaultTaxRateBp, round_off AS roundOff,
-            invoice_notes AS invoiceNotes, invoice_terms AS invoiceTerms
+export async function getSettings(): Promise<Settings> {
+  const row = await one<SettingsRow>(
+    `SELECT business_name AS "businessName", legal_name AS "legalName",
+            address_line1 AS "addressLine1", address_line2 AS "addressLine2", city,
+            state_code AS "stateCode", pincode, email, phone, website,
+            gst_registered AS "gstRegistered", gstin, pan,
+            bank_account_name AS "bankAccountName", bank_account_number AS "bankAccountNumber",
+            bank_ifsc AS "bankIfsc", bank_name AS "bankName", bank_branch AS "bankBranch",
+            upi_id AS "upiId", invoice_prefix AS "invoicePrefix",
+            payment_terms_days AS "paymentTermsDays", default_sac AS "defaultSac",
+            default_tax_rate_bp AS "defaultTaxRateBp", round_off AS "roundOff",
+            invoice_notes AS "invoiceNotes", invoice_terms AS "invoiceTerms"
        FROM settings WHERE id = 1`,
   );
   if (!row) throw new Error("ERP settings row is missing.");
   return { ...row, gstRegistered: row.gstRegistered === 1, roundOff: row.roundOff === 1 };
 }
 
-export function updateSettings(userId: number, values: Settings) {
-  transaction(() => {
-    run(
+export async function updateSettings(userId: number, values: Settings) {
+  await transaction(async () => {
+    await run(
       `UPDATE settings SET
          business_name = @businessName, legal_name = @legalName,
          address_line1 = @addressLine1, address_line2 = @addressLine2, city = @city,
@@ -73,11 +73,11 @@ export function updateSettings(userId: number, values: Settings) {
          payment_terms_days = @paymentTermsDays, default_sac = @defaultSac,
          default_tax_rate_bp = @defaultTaxRateBp, round_off = @roundOff,
          invoice_notes = @invoiceNotes, invoice_terms = @invoiceTerms,
-         updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
+         updated_at = erp_now()
        WHERE id = 1`,
       { ...values, gstRegistered: values.gstRegistered ? 1 : 0, roundOff: values.roundOff ? 1 : 0 },
     );
-    audit(userId, "update", "settings", 1, "Company settings updated");
+    await audit(userId, "update", "settings", 1, "Company settings updated");
   });
 }
 

@@ -18,8 +18,8 @@ export const metadata: Metadata = { title: "New invoice" };
 export default async function NewInvoicePage({ searchParams }: PageProps<"/admin/invoices/new">) {
   await requireAdmin();
   const { client } = await searchParams;
-  const settings = getSettings();
-  const clients = clientOptions();
+  const settings = await getSettings();
+  const clients = await clientOptions();
   const preselected = clients.find((c) => String(c.id) === client);
   const today = todayIST();
 

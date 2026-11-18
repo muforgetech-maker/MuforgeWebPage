@@ -29,17 +29,17 @@ export default async function ReportsPage({ searchParams }: PageProps<"/admin/re
   const today = todayIST();
   const period = resolvePeriod(await searchParams, today, "fy");
   // "All time" starts at the first record; future months are left off.
-  const from = period.key === "all" ? (earliestActivity() ?? today) : period.from;
+  const from = period.key === "all" ? ((await earliestActivity()) ?? today) : period.from;
   const to = period.to > today && period.key !== "custom" ? today : period.to;
 
-  const summary = periodSummary(from, to);
-  const months = from <= to ? monthlyTrend(from, to) : [];
-  const chartMonths = months.length > 24 ? monthlyTrend(shiftMonth(to, -23), to) : months;
-  const gst = gstSummary(from, to);
-  const open = openInvoices();
+  const summary = await periodSummary(from, to);
+  const months = from <= to ? await monthlyTrend(from, to) : [];
+  const chartMonths = months.length > 24 ? await monthlyTrend(shiftMonth(to, -23), to) : months;
+  const gst = await gstSummary(from, to);
+  const open = await openInvoices();
   const aging = receivablesAging(open);
-  const categories = expensesByCategory(from, to);
-  const clients = topClients(from, to);
+  const categories = await expensesByCategory(from, to);
+  const clients = await topClients(from, to);
   const query = periodQuery(period);
 
   const sum = <T,>(rows: T[], pick: (row: T) => number) => rows.reduce((total, row) => total + pick(row), 0);

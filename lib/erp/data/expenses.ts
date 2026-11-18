@@ -1,5 +1,5 @@
 import "server-only";
-import { all, audit, one, run, transaction } from "@/lib/erp/db";
+import { all, audit, insert, one, run, transaction } from "@/lib/erp/db";
 import { formatINR } from "@/lib/erp/money";
 
 /*
@@ -42,20 +42,20 @@ export type ExpenseInput = {
 export type Expense = ExpenseInput & { id: number; createdAt: string };
 
 const EXPENSE_COLUMNS = `
-  id, spent_on AS spentOn, category, vendor, description, amount_paise AS amountPaise,
-  gst_paise AS gstPaise, method, reference, notes, created_at AS createdAt`;
+  id, spent_on AS "spentOn", category, vendor, description, amount_paise AS "amountPaise",
+  gst_paise AS "gstPaise", method, reference, notes, created_at AS "createdAt"`;
 
-export function listExpenses(
+export async function listExpenses(
   filter: { from?: string; to?: string; category?: string; query?: string } = {},
 ) {
   const like = `%${(filter.query ?? "").replace(/[\\%_]/g, "\\$&")}%`;
-  return all<Expense>(
+  return await all<Expense>(
     `SELECT ${EXPENSE_COLUMNS} FROM expenses
       WHERE (@from IS NULL OR spent_on >= @from)
         AND (@to IS NULL OR spent_on <= @to)
         AND (@category IS NULL OR category = @category)
-        AND (description LIKE @like ESCAPE '\\' OR vendor LIKE @like ESCAPE '\\'
-             OR reference LIKE @like ESCAPE '\\')
+        AND (description ILIKE @like ESCAPE '\\' OR vendor ILIKE @like ESCAPE '\\'
+             OR reference ILIKE @like ESCAPE '\\')
       ORDER BY spent_on DESC, id DESC`,
     {
       from: filter.from ?? null,
@@ -66,45 +66,44 @@ export function listExpenses(
   );
 }
 
-export function getExpense(id: number) {
-  return one<Expense>(`SELECT ${EXPENSE_COLUMNS} FROM expenses WHERE id = ?`, id) ?? null;
+export async function getExpense(id: number) {
+  return (await one<Expense>(`SELECT ${EXPENSE_COLUMNS} FROM expenses WHERE id = ?`, id)) ?? null;
 }
 
-export function createExpense(userId: number, input: ExpenseInput) {
-  return transaction(() => {
-    const result = run(
+export async function createExpense(userId: number, input: ExpenseInput) {
+  return await transaction(async () => {
+    const id = await insert(
       `INSERT INTO expenses (spent_on, category, vendor, description, amount_paise, gst_paise,
          method, reference, notes, created_by)
        VALUES (@spentOn, @category, @vendor, @description, @amountPaise, @gstPaise,
          @method, @reference, @notes, @userId)`,
       { ...input, userId },
     );
-    const id = Number(result.lastInsertRowid);
-    audit(userId, "create", "expense", id, `${formatINR(input.amountPaise)} ${input.description}`);
+    await audit(userId, "create", "expense", id, `${formatINR(input.amountPaise)} ${input.description}`);
     return id;
   });
 }
 
-export function updateExpense(userId: number, id: number, input: ExpenseInput) {
-  transaction(() => {
-    run(
+export async function updateExpense(userId: number, id: number, input: ExpenseInput) {
+  await transaction(async () => {
+    await run(
       `UPDATE expenses SET spent_on = @spentOn, category = @category, vendor = @vendor,
          description = @description, amount_paise = @amountPaise, gst_paise = @gstPaise,
          method = @method, reference = @reference, notes = @notes,
-         updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
+         updated_at = erp_now()
        WHERE id = @id`,
       { ...input, id },
     );
-    audit(userId, "update", "expense", id, `${formatINR(input.amountPaise)} ${input.description}`);
+    await audit(userId, "update", "expense", id, `${formatINR(input.amountPaise)} ${input.description}`);
   });
 }
 
-export function deleteExpense(userId: number, id: number) {
-  transaction(() => {
-    const expense = getExpense(id);
-    run("DELETE FROM expenses WHERE id = ?", id);
+export async function deleteExpense(userId: number, id: number) {
+  await transaction(async () => {
+    const expense = await getExpense(id);
+    await run("DELETE FROM expenses WHERE id = ?", id);
     if (expense) {
-      audit(userId, "delete", "expense", id, `${formatINR(expense.amountPaise)} ${expense.description}`);
+      await audit(userId, "delete", "expense", id, `${formatINR(expense.amountPaise)} ${expense.description}`);
     }
   });
 }

@@ -14,7 +14,7 @@ export const metadata: Metadata = { title: "Edit client" };
 export default async function EditClientPage({ params }: PageProps<"/admin/clients/[id]/edit">) {
   await requireAdmin();
   const id = parseId((await params).id);
-  const client = id ? getClient(id) : null;
+  const client = id ? await getClient(id) : null;
   if (!client) notFound();
 
   return (

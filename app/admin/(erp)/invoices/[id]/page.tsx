@@ -23,7 +23,7 @@ import { PrintButton, RecordPaymentForm, VoidInvoiceForm } from "./invoice-panel
 async function loadInvoice(params: PageProps<"/admin/invoices/[id]">["params"]) {
   await requireAdmin();
   const id = parseId((await params).id);
-  return id ? getInvoice(id) : null;
+  return id ? await getInvoice(id) : null;
 }
 
 // Renders per request behind the login; see the ERP layout.

@@ -83,10 +83,10 @@ function readLines(form: FormReader): LineInput[] {
   });
 }
 
-function readInvoice(formData: FormData, existingClientId: number | null) {
+async function readInvoice(formData: FormData, existingClientId: number | null) {
   const form = new FormReader(formData);
   const clientId = form.id("clientId");
-  const client = clientId ? getClient(clientId) : null;
+  const client = clientId ? await getClient(clientId) : null;
   if (!client) form.fail("clientId", "Choose a client.");
   // An archived client can stay on an invoice it already had, but not be newly chosen.
   else if (client.archived && client.id !== existingClientId) {
@@ -121,10 +121,10 @@ export async function saveInvoice(
   formData: FormData,
 ): Promise<ActionState> {
   const admin = await requireAdmin();
-  const existing = invoiceId ? getInvoice(invoiceId) : null;
+  const existing = invoiceId ? await getInvoice(invoiceId) : null;
   if (invoiceId && !existing) return errorState("This invoice no longer exists.");
 
-  const { form, input } = readInvoice(formData, existing?.clientId ?? null);
+  const { form, input } = await readInvoice(formData, existing?.clientId ?? null);
   if (!form.ok) {
     const lineProblem = Object.keys(form.errors).some((key) => key.startsWith("lines"));
     return errorState(
@@ -136,8 +136,8 @@ export async function saveInvoice(
   const issue = formData.get("intent") === "issue";
   let id = invoiceId;
   try {
-    if (id) updateInvoice(admin.id, id, input, issue);
-    else id = createInvoice(admin.id, input, issue);
+    if (id) await updateInvoice(admin.id, id, input, issue);
+    else id = await createInvoice(admin.id, input, issue);
   } catch (error) {
     if (error instanceof InvoiceError) return errorState(error.message);
     throw error;
@@ -148,10 +148,16 @@ export async function saveInvoice(
 }
 
 /** Wraps a mutation that may refuse with a domain error. */
-async function attempt(work: (adminId: number) => void, message?: string): Promise<ActionState> {
+async function attempt(
+  // Whatever the mutation returns is discarded; only whether it threw matters.
+  work: (adminId: number) => Promise<unknown>,
+  message?: string,
+): Promise<ActionState> {
   const admin = await requireAdmin();
   try {
-    work(admin.id);
+    // Awaited inside the try: without it a rejected mutation would escape
+    // this handler and the action would report success.
+    await work(admin.id);
   } catch (error) {
     if (error instanceof InvoiceError || error instanceof PaymentError) return errorState(error.message);
     throw error;
@@ -161,7 +167,7 @@ async function attempt(work: (adminId: number) => void, message?: string): Promi
 }
 
 export async function issueInvoiceAction(invoiceId: number): Promise<ActionState> {
-  return attempt((adminId) => issueInvoice(adminId, invoiceId));
+  return await attempt(async (adminId) => await issueInvoice(adminId, invoiceId));
 }
 
 export async function voidInvoiceAction(
@@ -171,11 +177,11 @@ export async function voidInvoiceAction(
 ): Promise<ActionState> {
   const reason = String(formData.get("reason") ?? "").trim().slice(0, 300);
   if (!reason) return errorState("Give a reason for voiding, such as “raised twice”.", { reason: "Required." });
-  return attempt((adminId) => voidInvoice(adminId, invoiceId, reason));
+  return await attempt(async (adminId) => await voidInvoice(adminId, invoiceId, reason));
 }
 
 export async function deleteDraftAction(invoiceId: number): Promise<ActionState> {
-  const result = await attempt((adminId) => deleteDraft(adminId, invoiceId));
+  const result = await attempt(async (adminId) => await deleteDraft(adminId, invoiceId));
   if (result.status === "error") return result;
   redirect("/admin/invoices");
 }
@@ -184,7 +190,7 @@ export async function duplicateInvoiceAction(invoiceId: number): Promise<ActionS
   const admin = await requireAdmin();
   let newId: number;
   try {
-    newId = duplicateInvoice(admin.id, invoiceId);
+    newId = await duplicateInvoice(admin.id, invoiceId);
   } catch (error) {
     if (error instanceof InvoiceError) return errorState(error.message);
     throw error;
@@ -210,13 +216,13 @@ export async function recordPaymentAction(
     await requireAdmin();
     return errorState("Please fix the highlighted fields.", form.errors);
   }
-  return attempt((adminId) => {
-    recordPayment(adminId, invoiceId, input);
+  return await attempt(async (adminId) => {
+    await recordPayment(adminId, invoiceId, input);
   }, "Payment recorded.");
 }
 
 export async function deletePaymentAction(paymentId: number): Promise<ActionState> {
-  return attempt((adminId) => {
-    deletePayment(adminId, paymentId);
+  return await attempt(async (adminId) => {
+    await deletePayment(adminId, paymentId);
   });
 }

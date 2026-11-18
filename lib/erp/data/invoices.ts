@@ -1,6 +1,6 @@
 import "server-only";
 import { addDays, financialYear, todayIST } from "@/lib/erp/dates";
-import { all, audit, one, run, transaction } from "@/lib/erp/db";
+import { all, audit, insert, one, run, transaction } from "@/lib/erp/db";
 import { stateName } from "@/lib/erp/gst";
 import {
   computeInvoiceTotals,
@@ -158,8 +158,8 @@ function sellerFrom(settings: Settings): Seller {
   };
 }
 
-function billToFor(clientId: number): Party {
-  const client = getClient(clientId);
+async function billToFor(clientId: number): Promise<Party> {
+  const client = await getClient(clientId);
   if (!client) throw new InvoiceError("The client for this invoice no longer exists.");
   return {
     name: client.name,
@@ -188,13 +188,13 @@ export type InvoiceFilter = {
   to?: string;
 };
 
-export function listInvoices(filter: InvoiceFilter = {}): InvoiceListRow[] {
+export async function listInvoices(filter: InvoiceFilter = {}): Promise<InvoiceListRow[]> {
   const today = todayIST();
   const like = `%${(filter.query ?? "").replace(/[\\%_]/g, "\\$&")}%`;
-  const rows = all<Omit<InvoiceListRow, "balancePaise" | "displayStatus">>(
-    `SELECT i.id, i.number, i.status, i.client_id AS clientId, c.name AS clientName,
-            i.issue_date AS issueDate, i.due_date AS dueDate, i.total_paise AS totalPaise,
-            COALESCE(p.paid, 0) AS paidPaise
+  const rows = await all<Omit<InvoiceListRow, "balancePaise" | "displayStatus">>(
+    `SELECT i.id, i.number, i.status, i.client_id AS "clientId", c.name AS "clientName",
+            i.issue_date AS "issueDate", i.due_date AS "dueDate", i.total_paise AS "totalPaise",
+            COALESCE(p.paid, 0) AS "paidPaise"
        FROM invoices i
        JOIN clients c ON c.id = i.client_id
        LEFT JOIN (SELECT invoice_id, SUM(amount_paise) AS paid FROM payments GROUP BY invoice_id) p
@@ -202,7 +202,7 @@ export function listInvoices(filter: InvoiceFilter = {}): InvoiceListRow[] {
       WHERE (@clientId IS NULL OR i.client_id = @clientId)
         AND (@from IS NULL OR i.issue_date >= @from)
         AND (@to IS NULL OR i.issue_date <= @to)
-        AND (COALESCE(i.number, '') LIKE @like ESCAPE '\\' OR c.name LIKE @like ESCAPE '\\')
+        AND (COALESCE(i.number, '') ILIKE @like ESCAPE '\\' OR c.name ILIKE @like ESCAPE '\\')
       ORDER BY i.issue_date DESC, i.id DESC`,
     {
       clientId: filter.clientId ?? null,
@@ -242,15 +242,15 @@ export type RegisterRow = {
 };
 
 /** Issued and void invoices in number order: the sales register for GST filing. */
-export function invoiceRegister(from: string, to: string): RegisterRow[] {
-  return all<RegisterRow>(
-    `SELECT i.number, i.status, i.issue_date AS issueDate, i.due_date AS dueDate,
-            COALESCE(json_extract(i.bill_to_json, '$.name'), c.name) AS clientName,
-            COALESCE(json_extract(i.bill_to_json, '$.gstin'), c.gstin) AS clientGstin,
-            i.place_of_supply AS placeOfSupply, i.subtotal_paise AS subtotalPaise,
-            i.cgst_paise AS cgstPaise, i.sgst_paise AS sgstPaise, i.igst_paise AS igstPaise,
-            i.round_off_paise AS roundOffPaise, i.total_paise AS totalPaise,
-            COALESCE(p.paid, 0) AS paidPaise
+export async function invoiceRegister(from: string, to: string): Promise<RegisterRow[]> {
+  return await all<RegisterRow>(
+    `SELECT i.number, i.status, i.issue_date AS "issueDate", i.due_date AS "dueDate",
+            COALESCE(json_extract(i.bill_to_json, '$.name'), c.name) AS "clientName",
+            COALESCE(json_extract(i.bill_to_json, '$.gstin'), c.gstin) AS "clientGstin",
+            i.place_of_supply AS "placeOfSupply", i.subtotal_paise AS "subtotalPaise",
+            i.cgst_paise AS "cgstPaise", i.sgst_paise AS "sgstPaise", i.igst_paise AS "igstPaise",
+            i.round_off_paise AS "roundOffPaise", i.total_paise AS "totalPaise",
+            COALESCE(p.paid, 0) AS "paidPaise"
        FROM invoices i
        JOIN clients c ON c.id = i.client_id
        LEFT JOIN (SELECT invoice_id, SUM(amount_paise) AS paid FROM payments GROUP BY invoice_id) p
@@ -267,36 +267,36 @@ type InvoiceRow = Omit<
   "billTo" | "seller" | "gstRegistered" | "items" | "payments" | "paidPaise" | "balancePaise" | "displayStatus"
 > & { billToJson: string | null; sellerJson: string | null };
 
-export function getInvoice(id: number): InvoiceDetail | null {
-  const row = one<InvoiceRow>(
-    `SELECT id, number, status, client_id AS clientId, issue_date AS issueDate,
-            due_date AS dueDate, place_of_supply AS placeOfSupply, tax_mode AS taxMode,
-            subtotal_paise AS subtotalPaise, cgst_paise AS cgstPaise, sgst_paise AS sgstPaise,
-            igst_paise AS igstPaise, round_off_paise AS roundOffPaise, total_paise AS totalPaise,
-            notes, terms, issued_at AS issuedAt, voided_at AS voidedAt, void_reason AS voidReason,
-            created_at AS createdAt, updated_at AS updatedAt,
-            bill_to_json AS billToJson, seller_json AS sellerJson
+export async function getInvoice(id: number): Promise<InvoiceDetail | null> {
+  const row = await one<InvoiceRow>(
+    `SELECT id, number, status, client_id AS "clientId", issue_date AS "issueDate",
+            due_date AS "dueDate", place_of_supply AS "placeOfSupply", tax_mode AS "taxMode",
+            subtotal_paise AS "subtotalPaise", cgst_paise AS "cgstPaise", sgst_paise AS "sgstPaise",
+            igst_paise AS "igstPaise", round_off_paise AS "roundOffPaise", total_paise AS "totalPaise",
+            notes, terms, issued_at AS "issuedAt", voided_at AS "voidedAt", void_reason AS "voidReason",
+            created_at AS "createdAt", updated_at AS "updatedAt",
+            bill_to_json AS "billToJson", seller_json AS "sellerJson"
        FROM invoices WHERE id = ?`,
     id,
   );
   if (!row) return null;
 
-  const items = all<InvoiceItem>(
-    `SELECT id, description, sac, quantity_milli AS quantityMilli, unit,
-            rate_paise AS ratePaise, tax_rate_bp AS taxRateBp, amount_paise AS amountPaise
+  const items = await all<InvoiceItem>(
+    `SELECT id, description, sac, quantity_milli AS "quantityMilli", unit,
+            rate_paise AS "ratePaise", tax_rate_bp AS "taxRateBp", amount_paise AS "amountPaise"
        FROM invoice_items WHERE invoice_id = ? ORDER BY position`,
     id,
   );
-  const payments = all<Payment>(
-    `SELECT id, paid_on AS paidOn, amount_paise AS amountPaise, method, reference, notes
+  const payments = await all<Payment>(
+    `SELECT id, paid_on AS "paidOn", amount_paise AS "amountPaise", method, reference, notes
        FROM payments WHERE invoice_id = ? ORDER BY paid_on, id`,
     id,
   );
 
   // Drafts show live details; issued and void invoices show their snapshot.
   const { billToJson, sellerJson, ...invoice } = row;
-  const seller: Seller = sellerJson ? JSON.parse(sellerJson) : sellerFrom(getSettings());
-  const billTo: Party = billToJson ? JSON.parse(billToJson) : billToFor(invoice.clientId);
+  const seller: Seller = sellerJson ? JSON.parse(sellerJson) : sellerFrom(await getSettings());
+  const billTo: Party = billToJson ? JSON.parse(billToJson) : await billToFor(invoice.clientId);
   const paidPaise = payments.reduce((sum, p) => sum + p.amountPaise, 0);
 
   return {
@@ -332,10 +332,12 @@ function computeFor(input: InvoiceInput, settings: Settings) {
   return { mode, totals: computeInvoiceTotals(input.lines, mode, settings.roundOff) };
 }
 
-function writeItems(invoiceId: number, lines: ReturnType<typeof computeInvoiceTotals>["lines"]) {
-  run("DELETE FROM invoice_items WHERE invoice_id = ?", invoiceId);
-  lines.forEach((line, position) => {
-    run(
+async function writeItems(invoiceId: number, lines: ReturnType<typeof computeInvoiceTotals>["lines"]) {
+  await run("DELETE FROM invoice_items WHERE invoice_id = ?", invoiceId);
+  // Sequential on purpose: these share the caller's transaction, which is a
+  // single connection, so the inserts cannot be issued concurrently.
+  for (const [position, line] of lines.entries()) {
+    await run(
       `INSERT INTO invoice_items (invoice_id, position, description, sac, quantity_milli,
          unit, rate_paise, tax_rate_bp, amount_paise)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -349,43 +351,43 @@ function writeItems(invoiceId: number, lines: ReturnType<typeof computeInvoiceTo
       line.taxRateBp,
       line.amountPaise,
     );
-  });
+  }
 }
 
-function nextInvoiceNumber(prefix: string, issueDate: string) {
+async function nextInvoiceNumber(prefix: string, issueDate: string) {
   const fy = financialYear(issueDate);
-  const row = one<{ lastNumber: number }>(
+  const row = await one<{ lastNumber: number }>(
     `INSERT INTO invoice_sequences (financial_year, last_number) VALUES (?, 1)
      ON CONFLICT (financial_year) DO UPDATE SET last_number = last_number + 1
-     RETURNING last_number AS lastNumber`,
+     RETURNING last_number AS "lastNumber"`,
     fy,
   );
   return `${prefix}/${fy}/${String(row!.lastNumber).padStart(4, "0")}`;
 }
 
 /** Assigns a number and freezes details. Runs inside the caller's transaction. */
-function issueInPlace(userId: number, id: number) {
-  const invoice = getInvoice(id);
+async function issueInPlace(userId: number, id: number) {
+  const invoice = await getInvoice(id);
   if (!invoice) throw new InvoiceError("Invoice not found.");
   if (invoice.status !== "draft") throw new InvoiceError("Only a draft can be issued.");
   if (invoice.items.length === 0) throw new InvoiceError("Add at least one line before issuing.");
 
-  const settings = getSettings();
+  const settings = await getSettings();
   if (settings.gstRegistered && !settings.gstin) {
     throw new InvoiceError("Add your GSTIN under Settings before issuing a GST invoice.");
   }
 
   // Recompute with today's settings in case GST or rounding changed since the draft was saved.
   const { mode, totals } = computeFor({ ...invoice, lines: invoice.items }, settings);
-  const number = nextInvoiceNumber(settings.invoicePrefix, invoice.issueDate);
+  const number = await nextInvoiceNumber(settings.invoicePrefix, invoice.issueDate);
 
-  writeItems(id, totals.lines);
-  run(
+  await writeItems(id, totals.lines);
+  await run(
     `UPDATE invoices SET status = 'issued', number = ?, tax_mode = ?,
        subtotal_paise = ?, cgst_paise = ?, sgst_paise = ?, igst_paise = ?,
        round_off_paise = ?, total_paise = ?, bill_to_json = ?, seller_json = ?,
-       issued_at = strftime('%Y-%m-%dT%H:%M:%fZ','now'),
-       updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
+       issued_at = erp_now(),
+       updated_at = erp_now()
      WHERE id = ?`,
     number,
     mode,
@@ -395,19 +397,19 @@ function issueInPlace(userId: number, id: number) {
     totals.igstPaise,
     totals.roundOffPaise,
     totals.totalPaise,
-    JSON.stringify(billToFor(invoice.clientId)),
+    JSON.stringify(await billToFor(invoice.clientId)),
     JSON.stringify(sellerFrom(settings)),
     id,
   );
-  audit(userId, "issue", "invoice", id, number);
+  await audit(userId, "issue", "invoice", id, number);
   return number;
 }
 
-export function createInvoice(userId: number, input: InvoiceInput, issue: boolean) {
-  return transaction(() => {
-    const settings = getSettings();
+export async function createInvoice(userId: number, input: InvoiceInput, issue: boolean) {
+  return await transaction(async () => {
+    const settings = await getSettings();
     const { mode, totals } = computeFor(input, settings);
-    const result = run(
+    const id = await insert(
       `INSERT INTO invoices (status, client_id, issue_date, due_date, place_of_supply, tax_mode,
          subtotal_paise, cgst_paise, sgst_paise, igst_paise, round_off_paise, total_paise,
          notes, terms, created_by)
@@ -427,17 +429,16 @@ export function createInvoice(userId: number, input: InvoiceInput, issue: boolea
       input.terms,
       userId,
     );
-    const id = Number(result.lastInsertRowid);
-    writeItems(id, totals.lines);
-    audit(userId, "create", "invoice", id, "Draft created");
-    if (issue) issueInPlace(userId, id);
+    await writeItems(id, totals.lines);
+    await audit(userId, "create", "invoice", id, "Draft created");
+    if (issue) await issueInPlace(userId, id);
     return id;
   });
 }
 
-export function updateInvoice(userId: number, id: number, input: InvoiceInput, issue: boolean) {
-  transaction(() => {
-    const existing = getInvoice(id);
+export async function updateInvoice(userId: number, id: number, input: InvoiceInput, issue: boolean) {
+  await transaction(async () => {
+    const existing = await getInvoice(id);
     if (!existing) throw new InvoiceError("Invoice not found.");
     if (!isEditable(existing)) {
       throw new InvoiceError(
@@ -455,16 +456,16 @@ export function updateInvoice(userId: number, id: number, input: InvoiceInput, i
       );
     }
 
-    const settings = getSettings();
+    const settings = await getSettings();
     const { mode, totals } = computeFor(input, settings);
     const isIssued = existing.status === "issued";
 
-    run(
+    await run(
       `UPDATE invoices SET client_id = ?, issue_date = ?, due_date = ?, place_of_supply = ?,
          tax_mode = ?, subtotal_paise = ?, cgst_paise = ?, sgst_paise = ?, igst_paise = ?,
          round_off_paise = ?, total_paise = ?, notes = ?, terms = ?,
          bill_to_json = ?, seller_json = ?,
-         updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
+         updated_at = erp_now()
        WHERE id = ?`,
       input.clientId,
       input.issueDate,
@@ -480,63 +481,63 @@ export function updateInvoice(userId: number, id: number, input: InvoiceInput, i
       input.notes,
       input.terms,
       // A corrected issued invoice is re-issued with current details.
-      isIssued ? JSON.stringify(billToFor(input.clientId)) : null,
+      isIssued ? JSON.stringify(await billToFor(input.clientId)) : null,
       isIssued ? JSON.stringify(sellerFrom(settings)) : null,
       id,
     );
-    writeItems(id, totals.lines);
-    audit(userId, "update", "invoice", id, existing.number ?? "Draft");
-    if (issue && !isIssued) issueInPlace(userId, id);
+    await writeItems(id, totals.lines);
+    await audit(userId, "update", "invoice", id, existing.number ?? "Draft");
+    if (issue && !isIssued) await issueInPlace(userId, id);
   });
 }
 
-export function issueInvoice(userId: number, id: number) {
-  return transaction(() => issueInPlace(userId, id));
+export async function issueInvoice(userId: number, id: number) {
+  return await transaction(async () => await issueInPlace(userId, id));
 }
 
-export function voidInvoice(userId: number, id: number, reason: string) {
-  transaction(() => {
-    const invoice = getInvoice(id);
+export async function voidInvoice(userId: number, id: number, reason: string) {
+  await transaction(async () => {
+    const invoice = await getInvoice(id);
     if (!invoice) throw new InvoiceError("Invoice not found.");
     if (invoice.status !== "issued") throw new InvoiceError("Only an issued invoice can be voided.");
     if (invoice.payments.length > 0) {
       throw new InvoiceError("Delete the payments recorded on this invoice before voiding it.");
     }
-    run(
+    await run(
       `UPDATE invoices SET status = 'void', void_reason = ?,
-         voided_at = strftime('%Y-%m-%dT%H:%M:%fZ','now'),
-         updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
+         voided_at = erp_now(),
+         updated_at = erp_now()
        WHERE id = ?`,
       reason,
       id,
     );
-    audit(userId, "void", "invoice", id, `${invoice.number}: ${reason}`);
+    await audit(userId, "void", "invoice", id, `${invoice.number}: ${reason}`);
   });
 }
 
-export function deleteDraft(userId: number, id: number) {
-  transaction(() => {
-    const invoice = getInvoice(id);
+export async function deleteDraft(userId: number, id: number) {
+  await transaction(async () => {
+    const invoice = await getInvoice(id);
     if (!invoice) throw new InvoiceError("Invoice not found.");
     if (invoice.status !== "draft") {
       throw new InvoiceError("Issued invoices can’t be deleted; void them instead.");
     }
-    run("DELETE FROM invoices WHERE id = ?", id);
-    audit(userId, "delete", "invoice", id, "Draft deleted");
+    await run("DELETE FROM invoices WHERE id = ?", id);
+    await audit(userId, "delete", "invoice", id, "Draft deleted");
   });
 }
 
 /** Copies an invoice's client and lines into a new draft dated today. */
-export function duplicateInvoice(userId: number, id: number) {
-  const source = getInvoice(id);
+export async function duplicateInvoice(userId: number, id: number) {
+  const source = await getInvoice(id);
   if (!source) throw new InvoiceError("Invoice not found.");
-  const client = getClient(source.clientId);
+  const client = await getClient(source.clientId);
   if (!client || client.archived) {
     throw new InvoiceError("This invoice’s client is archived. Restore the client first.");
   }
-  const settings = getSettings();
+  const settings = await getSettings();
   const issueDate = todayIST();
-  return createInvoice(
+  return await createInvoice(
     userId,
     {
       clientId: source.clientId,

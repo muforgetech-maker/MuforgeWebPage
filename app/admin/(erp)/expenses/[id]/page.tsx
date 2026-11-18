@@ -18,7 +18,7 @@ export const metadata: Metadata = { title: "Edit expense" };
 export default async function EditExpensePage({ params }: PageProps<"/admin/expenses/[id]">) {
   await requireAdmin();
   const id = parseId((await params).id);
-  const expense = id ? getExpense(id) : null;
+  const expense = id ? await getExpense(id) : null;
   if (!expense) notFound();
 
   return (

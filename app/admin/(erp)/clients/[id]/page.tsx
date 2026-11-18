@@ -16,7 +16,7 @@ import { formatINR } from "@/lib/erp/money";
 async function loadClient(params: PageProps<"/admin/clients/[id]">["params"]) {
   await requireAdmin();
   const id = parseId((await params).id);
-  return id ? getClient(id) : null;
+  return id ? await getClient(id) : null;
 }
 
 // Renders per request behind the login; see the ERP layout.
@@ -31,7 +31,7 @@ export default async function ClientPage({ params }: PageProps<"/admin/clients/[
   const client = await loadClient(params);
   if (!client) notFound();
 
-  const invoices = listInvoices({ clientId: client.id });
+  const invoices = await listInvoices({ clientId: client.id });
   const issued = invoices.filter((invoice) => invoice.status === "issued");
   const billed = issued.reduce((sum, invoice) => sum + invoice.totalPaise, 0);
   const outstanding = issued.reduce((sum, invoice) => sum + invoice.balancePaise, 0);

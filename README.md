@@ -29,7 +29,7 @@ A private back office for MuForge's money: clients, GST invoices, payments, expe
 
 ### First sign-in
 
-1. Requires Node.js 22.13 or newer (Node 24 recommended). The database uses the built-in `node:sqlite` module, so there is nothing extra to install.
+1. Create the database first (see **Database** below) and put its `DATABASE_URL` in `.env.local`. Nothing under `/admin` works without it.
 2. Add `ERP_ADMIN_EMAIL`, `ERP_ADMIN_PASSWORD` (at least 10 characters) and optionally `ERP_ADMIN_NAME` to `.env.local`. See `.env.example`.
 3. Restart `npm run dev`, open `/admin` and sign in with those details. The first login creates the account.
 4. Remove `ERP_ADMIN_PASSWORD` from `.env.local`. It is ignored once any user exists. Add colleagues under **Settings → Users**.
@@ -47,13 +47,23 @@ A private back office for MuForge's money: clients, GST invoices, payments, expe
 
 Passwords are hashed with scrypt. Sessions are random tokens stored hashed in the database, sent as an `HttpOnly`, `SameSite=Lax` cookie scoped to `/admin` (and `Secure` in production, so serve the site over HTTPS). Sessions last 12 hours. Five failed logins for an email (or 30 from one IP) lock further attempts for 15 minutes. `proxy.ts` only redirects signed-out visitors; every page, Server Action and export re-checks the session itself.
 
-### Data, backups and hosting
+### Database
 
-All ERP data is one SQLite file, by default `data/muforge-erp.sqlite` (set `ERP_DATABASE_PATH` to move it). The `data/` folder is git-ignored. **Never commit it.**
+All ERP data lives in a Supabase Postgres database. There is no file on disk, which is what lets the whole site — public pages and ERP together — run as one Vercel deployment.
 
-- **Back up regularly.** Use **Settings → Backup & activity → Download backup** for a consistent snapshot, and keep copies off the server. To restore, stop the app and replace the database file.
-- **Hosting needs a persistent disk.** Run `npm run build && npm start` on a VPS, a container with a mounted volume, or any Node host whose filesystem survives restarts and redeploys. Serverless platforms with an ephemeral filesystem (for example a default Vercel deployment) would lose the data. Moving there means swapping `lib/erp/db.ts` for a hosted database such as Postgres. All SQL is confined to `lib/erp/data/`.
-- Run a single app instance against the file. SQLite handles one office's traffic easily, but not several servers sharing one file over a network drive.
+**Setting it up**
+
+1. Create a project at [supabase.com](https://supabase.com). Pick the region nearest your users; `ap-south-1` (Mumbai) for India.
+2. Run `supabase/migrations/0001_erp_schema.sql` against it, either by pasting it into the dashboard's SQL editor or with `supabase db push`. It creates every table and seeds the company profile.
+3. In the dashboard choose **Connect → Transaction pooler** and copy that URI (port 6543). Put it in `.env.local` as `DATABASE_URL`, and add the same variable to the Vercel project.
+
+Use the **transaction pooler**, not the direct connection. Serverless instances are created and destroyed constantly; the pooler is what keeps that from opening thousands of Postgres connections.
+
+`DATABASE_URL` contains the database password. It is a server-only variable: never prefix it with `NEXT_PUBLIC_`, and never commit `.env.local`.
+
+**Backups.** Supabase takes its own, and **Settings → Backup & activity → Download backup** gives you a JSON copy — one array of rows per table, read inside a single transaction so the tables agree with each other. Take one weekly and keep it somewhere else.
+
+**Dialect.** Queries are written with `?` and `@named` placeholders, which `lib/erp/db.ts` rewrites to `$1..$n`. Dates and timestamps are stored as text (`YYYY-MM-DD` and ISO-8601 UTC) and flags as integer 0/1, matching what the forms submit. Every camelCase column alias is quoted, because Postgres folds unquoted identifiers to lower case. All SQL is confined to `lib/erp/data/`.
 
 ### Where the code is
 

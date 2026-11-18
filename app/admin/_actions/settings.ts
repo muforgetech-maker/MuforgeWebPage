@@ -111,7 +111,7 @@ export async function saveSettings(_state: ActionState, formData: FormData): Pro
   if (gstRegistered && !values.pan) values.pan = values.gstin.slice(2, 12);
   if (!gstRegistered) values.gstin = "";
 
-  updateSettings(admin.id, values);
+  await updateSettings(admin.id, values);
   revalidatePath("/admin", "layout");
   return successState("Settings saved. New invoices and drafts use them; issued invoices keep their details.");
 }
@@ -140,7 +140,7 @@ export async function addUser(_state: ActionState, formData: FormData): Promise<
 export async function toggleUserActive(userId: number, active: boolean): Promise<ActionState> {
   const admin = await requireAdmin();
   try {
-    setUserActive(admin.id, userId, active);
+    await setUserActive(admin.id, userId, active);
   } catch (error) {
     if (error instanceof UserError) return errorState(error.message);
     throw error;

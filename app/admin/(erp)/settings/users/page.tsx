@@ -16,7 +16,7 @@ export const metadata: Metadata = { title: "Users" };
 
 export default async function UsersPage() {
   const admin = await requireAdmin();
-  const users = listUsers();
+  const users = await listUsers();
 
   return (
     <div className="grid gap-6">

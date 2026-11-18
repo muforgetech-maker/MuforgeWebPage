@@ -18,7 +18,7 @@ export default async function PaymentsPage({ searchParams }: PageProps<"/admin/p
   await requireAdmin();
   const params = await searchParams;
   const period = resolvePeriod(params, todayIST(), "month");
-  const payments = listPayments({ from: period.from, to: period.to });
+  const payments = await listPayments({ from: period.from, to: period.to });
 
   const cash = payments.filter((p) => p.method !== TDS_METHOD).reduce((sum, p) => sum + p.amountPaise, 0);
   const tds = payments.filter((p) => p.method === TDS_METHOD).reduce((sum, p) => sum + p.amountPaise, 0);

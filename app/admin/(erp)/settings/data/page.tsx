@@ -4,7 +4,7 @@ import { Database, Download } from "lucide-react";
 import { TableCard } from "@/components/erp/ui";
 import { requireAdmin } from "@/lib/erp/auth";
 import { recentActivity } from "@/lib/erp/data/reports";
-import { databasePath } from "@/lib/erp/db";
+import { databaseLabel } from "@/lib/erp/db";
 import { formatTimestamp } from "@/lib/erp/dates";
 
 // Renders per request behind the login; see the ERP layout.
@@ -20,7 +20,7 @@ const entityLinks: Record<string, string> = {
 
 export default async function DataPage() {
   await requireAdmin();
-  const activity = recentActivity(150);
+  const activity = await recentActivity(150);
 
   return (
     <div className="grid gap-6">
@@ -32,11 +32,11 @@ export default async function DataPage() {
               Back up your data
             </h2>
             <p className="mt-1 text-sm text-text-muted">
-              Everything lives in one SQLite file. Download a copy at least weekly and keep it
-              somewhere other than this server, such as Google Drive. To restore, stop the app and
-              put the file back in place.
+              Your data lives in a managed Postgres database, which Supabase backs up on its own
+              schedule. Download a copy at least weekly as well, and keep it somewhere else, such
+              as Google Drive. The file is JSON: one list of rows per table.
             </p>
-            <p className="mt-3 break-all font-mono text-xs text-text-muted">{databasePath()}</p>
+            <p className="mt-3 break-all font-mono text-xs text-text-muted">{databaseLabel()}</p>
           </div>
           <a href="/admin/backup" className="erp-button" download>
             <Download size={16} aria-hidden="true" />

@@ -20,14 +20,14 @@ export default async function DashboardPage() {
   const admin = await requireAdmin();
   const today = todayIST();
   const month = monthRange(today);
-  const summary = periodSummary(month.from, month.to);
-  const open = openInvoices();
+  const summary = await periodSummary(month.from, month.to);
+  const open = await openInvoices();
   const overdue = open.filter((invoice) => invoice.daysOverdue > 0);
   const outstanding = open.reduce((sum, invoice) => sum + invoice.balancePaise, 0);
   const overdueTotal = overdue.reduce((sum, invoice) => sum + invoice.balancePaise, 0);
-  const trend = monthlyTrend(shiftMonth(today, -5), month.to);
-  const recent = listInvoices().slice(0, 6);
-  const gaps = settingsChecklist(getSettings());
+  const trend = await monthlyTrend(shiftMonth(today, -5), month.to);
+  const recent = (await listInvoices()).slice(0, 6);
+  const gaps = settingsChecklist(await getSettings());
   const firstName = admin.name.split(" ")[0];
 
   return (

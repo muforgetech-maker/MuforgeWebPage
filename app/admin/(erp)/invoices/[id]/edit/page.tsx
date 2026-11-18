@@ -20,7 +20,7 @@ export const metadata: Metadata = { title: "Edit invoice" };
 export default async function EditInvoicePage({ params }: PageProps<"/admin/invoices/[id]/edit">) {
   await requireAdmin();
   const id = parseId((await params).id);
-  const invoice = id ? getInvoice(id) : null;
+  const invoice = id ? await getInvoice(id) : null;
   if (!invoice) notFound();
 
   const title = invoice.number ? `Edit ${invoice.number}` : "Edit draft";
@@ -51,9 +51,9 @@ export default async function EditInvoicePage({ params }: PageProps<"/admin/invo
   }
 
   // Keep the invoice's own client selectable even if it has since been archived.
-  const clients = clientOptions();
+  const clients = await clientOptions();
   if (!clients.some((c) => c.id === invoice.clientId)) {
-    const client = getClient(invoice.clientId);
+    const client = await getClient(invoice.clientId);
     if (client) clients.unshift({ id: client.id, name: `${client.name} (archived)`, stateCode: client.stateCode, gstin: client.gstin });
   }
 
@@ -63,7 +63,7 @@ export default async function EditInvoicePage({ params }: PageProps<"/admin/invo
       <InvoiceEditor
         action={saveInvoice.bind(null, invoice.id)}
         clients={clients}
-        settings={editorSettings(getSettings())}
+        settings={editorSettings(await getSettings())}
         mode={invoice.status === "issued" ? "issued" : "draft"}
         cancelHref={back.href}
         initial={editorInitialFrom(invoice)}

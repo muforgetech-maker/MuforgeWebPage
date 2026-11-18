@@ -38,10 +38,10 @@ export async function saveExpense(
   if (!form.ok) return errorState("Please fix the highlighted fields.", form.errors);
 
   if (expenseId !== null) {
-    if (!getExpense(expenseId)) return errorState("This expense no longer exists.");
-    updateExpense(admin.id, expenseId, input);
+    if (!await getExpense(expenseId)) return errorState("This expense no longer exists.");
+    await updateExpense(admin.id, expenseId, input);
   } else {
-    createExpense(admin.id, input);
+    await createExpense(admin.id, input);
   }
 
   revalidatePath("/admin", "layout");
@@ -50,8 +50,8 @@ export async function saveExpense(
 
 export async function removeExpense(expenseId: number): Promise<ActionState> {
   const admin = await requireAdmin();
-  if (!getExpense(expenseId)) return errorState("This expense no longer exists.");
-  deleteExpense(admin.id, expenseId);
+  if (!await getExpense(expenseId)) return errorState("This expense no longer exists.");
+  await deleteExpense(admin.id, expenseId);
   revalidatePath("/admin", "layout");
   redirect("/admin/expenses");
 }

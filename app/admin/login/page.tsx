@@ -54,7 +54,7 @@ async function LoginPanel({ searchParams }: Pick<PageProps<"/admin/login">, "sea
   const next = safeNextPath(params.next);
   if (admin) redirect(next);
 
-  const setup = adminSetupState();
+  const setup = await adminSetupState();
 
   return (
     <>

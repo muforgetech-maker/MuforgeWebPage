@@ -64,10 +64,10 @@ export async function saveClient(
 
   let id = clientId;
   if (id !== null) {
-    if (!getClient(id)) return errorState("This client no longer exists.");
-    updateClient(admin.id, id, input);
+    if (!await getClient(id)) return errorState("This client no longer exists.");
+    await updateClient(admin.id, id, input);
   } else {
-    id = createClient(admin.id, input);
+    id = await createClient(admin.id, input);
   }
 
   revalidatePath("/admin", "layout");
@@ -79,15 +79,15 @@ export async function saveClient(
 
 export async function toggleClientArchived(clientId: number, archived: boolean): Promise<ActionState> {
   const admin = await requireAdmin();
-  if (!getClient(clientId)) return errorState("This client no longer exists.");
-  setClientArchived(admin.id, clientId, archived);
+  if (!await getClient(clientId)) return errorState("This client no longer exists.");
+  await setClientArchived(admin.id, clientId, archived);
   revalidatePath("/admin", "layout");
   return { status: "success" };
 }
 
 export async function removeClient(clientId: number): Promise<ActionState> {
   const admin = await requireAdmin();
-  if (!deleteClient(admin.id, clientId)) {
+  if (!await deleteClient(admin.id, clientId)) {
     return errorState("This client has invoices, so it can’t be deleted. Archive it instead.");
   }
   revalidatePath("/admin", "layout");

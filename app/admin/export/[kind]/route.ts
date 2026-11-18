@@ -45,7 +45,7 @@ export async function GET(request: Request, { params }: RouteContext<"/admin/exp
         "Place of supply", "Taxable value", "CGST", "SGST", "IGST", "Round off", "Total",
         "Paid", "Balance",
       ],
-      invoiceRegister(period.from, period.to).map((r) => {
+      (await invoiceRegister(period.from, period.to)).map((r) => {
         const isVoid = r.status === "void";
         return [
           r.number, isVoid ? "Void" : "Issued", r.issueDate, r.dueDate, text(r.clientName),
@@ -59,14 +59,14 @@ export async function GET(request: Request, { params }: RouteContext<"/admin/exp
   } else if (kind === "payments") {
     csv = toCsv(
       ["Date", "Invoice no", "Client", "Method", "Reference", "Amount"],
-      listPayments({ from: period.from, to: period.to }).map((p) => [
+      (await listPayments({ from: period.from, to: period.to })).map((p) => [
         p.paidOn, p.invoiceNumber, text(p.clientName), p.method, text(p.reference), money(p.amountPaise),
       ]),
     );
   } else if (kind === "expenses") {
     csv = toCsv(
       ["Date", "Category", "Description", "Paid to", "Method", "Reference", "Amount", "GST included"],
-      listExpenses({ from: period.from, to: period.to }).map((e) => [
+      (await listExpenses({ from: period.from, to: period.to })).map((e) => [
         e.spentOn, e.category, text(e.description), text(e.vendor), e.method, text(e.reference),
         money(e.amountPaise), money(e.gstPaise),
       ]),

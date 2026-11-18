@@ -17,7 +17,7 @@ export default async function ClientsPage({ searchParams }: PageProps<"/admin/cl
   const params = await searchParams;
   const query = typeof params.q === "string" ? params.q.slice(0, 100) : "";
   const showArchived = params.archived === "1";
-  const clients = listClients({ query, includeArchived: showArchived });
+  const clients = await listClients({ query, includeArchived: showArchived });
 
   return (
     <>

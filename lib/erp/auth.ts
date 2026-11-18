@@ -44,7 +44,7 @@ export const getCurrentAdmin = cache(async (): Promise<AdminUser | null> => {
   await connection();
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
   if (!token) return null;
-  const user = one<AdminUser>(
+  const user = await one<AdminUser>(
     `SELECT u.id, u.name, u.email
        FROM sessions s JOIN users u ON u.id = s.user_id
       WHERE s.token_hash = ? AND s.expires_at > ? AND u.active = 1`,
@@ -67,8 +67,8 @@ export async function createSession(userId: number) {
   const expires = new Date(Date.now() + SESSION_HOURS * 3_600_000);
   const requestHeaders = await headers();
 
-  run("DELETE FROM sessions WHERE expires_at <= ?", new Date().toISOString());
-  run(
+  await run("DELETE FROM sessions WHERE expires_at <= ?", new Date().toISOString());
+  await run(
     "INSERT INTO sessions (token_hash, user_id, expires_at, ip, user_agent) VALUES (?, ?, ?, ?, ?)",
     hashToken(token),
     userId,
@@ -90,13 +90,13 @@ export async function createSession(userId: number) {
 export async function destroySession() {
   const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE)?.value;
-  if (token) run("DELETE FROM sessions WHERE token_hash = ?", hashToken(token));
+  if (token) await run("DELETE FROM sessions WHERE token_hash = ?", hashToken(token));
   cookieStore.delete({ name: SESSION_COOKIE, path: SESSION_COOKIE_PATH });
 }
 
 /** Signs a user out everywhere, for example after a password change. */
-export function destroyAllSessions(userId: number) {
-  run("DELETE FROM sessions WHERE user_id = ?", userId);
+export async function destroyAllSessions(userId: number) {
+  await run("DELETE FROM sessions WHERE user_id = ?", userId);
 }
 
 // ---------------------------------------------------------------------------
@@ -108,9 +108,9 @@ const FAILURE_WINDOW_MS = 15 * 60 * 1000;
 const MAX_FAILURES_PER_EMAIL = 5;
 const MAX_FAILURES_PER_IP = 30;
 
-export function isLoginLocked(email: string, ip: string) {
+export async function isLoginLocked(email: string, ip: string) {
   const since = Date.now() - FAILURE_WINDOW_MS;
-  const counts = all<{ key: string; n: number }>(
+  const counts = await all<{ key: string; n: number }>(
     `SELECT key, COUNT(*) AS n FROM login_failures
       WHERE key IN (?, ?) AND at_ms > ? GROUP BY key`,
     `email:${email}`,
@@ -123,15 +123,15 @@ export function isLoginLocked(email: string, ip: string) {
   );
 }
 
-export function recordLoginFailure(email: string, ip: string) {
+export async function recordLoginFailure(email: string, ip: string) {
   const now = Date.now();
-  run("DELETE FROM login_failures WHERE at_ms < ?", now - 24 * 3_600_000);
-  run("INSERT INTO login_failures (key, at_ms) VALUES (?, ?)", `email:${email}`, now);
-  run("INSERT INTO login_failures (key, at_ms) VALUES (?, ?)", `ip:${ip}`, now);
+  await run("DELETE FROM login_failures WHERE at_ms < ?", now - 24 * 3_600_000);
+  await run("INSERT INTO login_failures (key, at_ms) VALUES (?, ?)", `email:${email}`, now);
+  await run("INSERT INTO login_failures (key, at_ms) VALUES (?, ?)", `ip:${ip}`, now);
 }
 
-export function clearLoginFailures(email: string) {
-  run("DELETE FROM login_failures WHERE key = ?", `email:${email}`);
+export async function clearLoginFailures(email: string) {
+  await run("DELETE FROM login_failures WHERE key = ?", `email:${email}`);
 }
 
 // ---------------------------------------------------------------------------
@@ -142,12 +142,12 @@ export function clearLoginFailures(email: string) {
 
 export type SetupState = "ready" | "missing-env" | "weak-password";
 
-function userCount() {
-  return one<{ n: number }>("SELECT COUNT(*) AS n FROM users")?.n ?? 0;
+async function userCount() {
+  return (await one<{ n: number }>("SELECT COUNT(*) AS n FROM users"))?.n ?? 0;
 }
 
-export function adminSetupState(): SetupState {
-  if (userCount() > 0) return "ready";
+export async function adminSetupState(): Promise<SetupState> {
+  if (await userCount() > 0) return "ready";
   const email = process.env.ERP_ADMIN_EMAIL?.trim();
   const password = process.env.ERP_ADMIN_PASSWORD ?? "";
   if (!email || !password) return "missing-env";
@@ -156,12 +156,12 @@ export function adminSetupState(): SetupState {
 }
 
 export async function ensureBootstrapAdmin() {
-  if (userCount() > 0 || adminSetupState() !== "ready") return;
+  if (await userCount() > 0 || (await adminSetupState()) !== "ready") return;
   const email = process.env.ERP_ADMIN_EMAIL!.trim().toLowerCase();
   const name = process.env.ERP_ADMIN_NAME?.trim() || "Administrator";
   const passwordHash = await hashPassword(process.env.ERP_ADMIN_PASSWORD!);
   // OR IGNORE: two first logins racing each other create one account, not an error.
-  run(
+  await run(
     "INSERT OR IGNORE INTO users (email, name, password_hash) VALUES (?, ?, ?)",
     email,
     name,
