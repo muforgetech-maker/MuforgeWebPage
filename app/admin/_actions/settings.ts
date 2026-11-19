@@ -84,6 +84,13 @@ export async function saveSettings(_state: ActionState, formData: FormData): Pro
       pattern: /^[A-Z0-9]{1,4}$/,
       patternMessage: "Use 1 to 4 letters or digits, so the full number stays within GST’s 16 characters.",
     }),
+    challanPrefix: form.text("challanPrefix", {
+      label: "Delivery challan prefix",
+      required: true,
+      uppercase: true,
+      pattern: /^[A-Z0-9]{1,4}$/,
+      patternMessage: "Use 1 to 4 letters or digits, so the full number stays within GST’s 16 characters.",
+    }),
     paymentTermsDays: form.integer("paymentTermsDays", { label: "Payment terms", min: 0, max: 365 }),
     defaultSac: form.text("defaultSac", {
       label: "Default SAC",

@@ -37,9 +37,10 @@ A private back office for MuForge's money: clients, GST invoices, payments, expe
 
 ### What it does
 
+- **Delivery challans.** Paperwork for goods that move before they are billed — job work, supply on approval, a handover ahead of the invoice. Challans run in their own consecutive series per financial year (`DC/2026-27/0001`), separate from invoices, and carry what Rule 55 asks for: the reason for the movement, both parties' GSTINs, HSN/SAC, quantities, the value of the consignment, and space for the consignee's signature. No tax is charged on a challan; **Create invoice** turns an issued one into a draft invoice carrying the same lines, and records which invoice it became so the same consignment cannot be billed twice.
 - **Invoices.** Drafts are free to edit or delete. Issuing assigns the next number in an unbroken series per financial year (`MF/2026-27/0001`, restarting each April). Tax is CGST + SGST for clients in your state and IGST for everyone else, calculated per rate. Totals are rounded to the rupee and printed in words. An issued invoice freezes the client and company details it was sent with. It can be corrected until a payment is recorded, and voided (keeping its number) if raised in error. **Print / PDF** prints an A4 invoice; choose "Save as PDF" in the print dialog.
 - **Payments.** Record full or part payments against issued invoices. "TDS deducted" settles the withheld portion without counting as cash received.
-- **Expenses.** Categorised spending, with the GST portion recorded as input tax.
+- **Expenses.** Categorised spending, with the GST portion recorded as input tax. Each expense can carry receipts — JPG, PNG, WEBP or PDF, up to 10 MB each.
 - **Reports.** Sales, collections, spending and net cash by month; a GST summary (output vs input tax) to work from for GSTR-1/3B; receivables by age; top clients. CSV exports of the invoice register, payments and expenses.
 - **Users and audit.** Each person has their own login. Deactivating a user signs them out immediately. Every change is recorded under **Settings → Backup & activity**.
 
@@ -60,6 +61,12 @@ All ERP data lives in a Supabase Postgres database. There is no file on disk, wh
 Use the **transaction pooler**, not the direct connection. Serverless instances are created and destroyed constantly; the pooler is what keeps that from opening thousands of Postgres connections.
 
 `DATABASE_URL` contains the database password. It is a server-only variable: never prefix it with `NEXT_PUBLIC_`, and never commit `.env.local`.
+
+### File storage
+
+Expense receipts go to a Supabase Storage bucket called `expense-attachments`, which `supabase/migrations/0002_challans_and_attachments.sql` creates. The bucket is **private**: nothing is served from Supabase directly. Every download goes through `/admin/attachments/[id]`, which checks the session first and returns the file with `Content-Disposition: attachment`, `nosniff` and a sandbox CSP, since these bytes were uploaded by a person and are served from the ERP's own origin. SVG is deliberately not an accepted type.
+
+This needs `SUPABASE_SERVICE_ROLE_KEY` in the environment (Supabase dashboard → Project settings → API). That key bypasses row-level security, so treat it exactly like the database password: server-side only, never `NEXT_PUBLIC_`.
 
 **Backups.** Supabase takes its own, and **Settings → Backup & activity → Download backup** gives you a JSON copy — one array of rows per table, read inside a single transaction so the tables agree with each other. Take one weekly and keep it somewhere else.
 

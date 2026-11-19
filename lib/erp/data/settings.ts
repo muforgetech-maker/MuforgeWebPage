@@ -28,6 +28,7 @@ export type Settings = {
   bankBranch: string;
   upiId: string;
   invoicePrefix: string;
+  challanPrefix: string;
   paymentTermsDays: number;
   defaultSac: string;
   defaultTaxRateBp: number;
@@ -50,6 +51,7 @@ export async function getSettings(): Promise<Settings> {
             bank_account_name AS "bankAccountName", bank_account_number AS "bankAccountNumber",
             bank_ifsc AS "bankIfsc", bank_name AS "bankName", bank_branch AS "bankBranch",
             upi_id AS "upiId", invoice_prefix AS "invoicePrefix",
+            challan_prefix AS "challanPrefix",
             payment_terms_days AS "paymentTermsDays", default_sac AS "defaultSac",
             default_tax_rate_bp AS "defaultTaxRateBp", round_off AS "roundOff",
             invoice_notes AS "invoiceNotes", invoice_terms AS "invoiceTerms"
@@ -70,6 +72,7 @@ export async function updateSettings(userId: number, values: Settings) {
          bank_account_name = @bankAccountName, bank_account_number = @bankAccountNumber,
          bank_ifsc = @bankIfsc, bank_name = @bankName, bank_branch = @bankBranch,
          upi_id = @upiId, invoice_prefix = @invoicePrefix,
+         challan_prefix = @challanPrefix,
          payment_terms_days = @paymentTermsDays, default_sac = @defaultSac,
          default_tax_rate_bp = @defaultTaxRateBp, round_off = @roundOff,
          invoice_notes = @invoiceNotes, invoice_terms = @invoiceTerms,

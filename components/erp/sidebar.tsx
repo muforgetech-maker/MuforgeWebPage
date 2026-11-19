@@ -12,6 +12,7 @@ import {
   Menu,
   Receipt,
   Settings,
+  Truck,
   Users,
   X,
 } from "lucide-react";
@@ -20,6 +21,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/invoices", label: "Invoices", icon: FileText },
+  { href: "/admin/challans", label: "Challans", icon: Truck },
   { href: "/admin/clients", label: "Clients", icon: Users },
   { href: "/admin/payments", label: "Payments", icon: Banknote },
   { href: "/admin/expenses", label: "Expenses", icon: Receipt },

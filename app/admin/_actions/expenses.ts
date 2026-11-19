@@ -4,6 +4,11 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/erp/auth";
 import {
+  addAttachment,
+  AttachmentError,
+  deleteAttachment,
+} from "@/lib/erp/data/attachments";
+import {
   createExpense,
   deleteExpense,
   expenseCategories,
@@ -12,7 +17,7 @@ import {
   updateExpense,
   type ExpenseInput,
 } from "@/lib/erp/data/expenses";
-import { errorState, FormReader, type ActionState } from "@/lib/erp/form";
+import { errorState, FormReader, successState, type ActionState } from "@/lib/erp/form";
 
 export async function saveExpense(
   expenseId: number | null,
@@ -54,4 +59,45 @@ export async function removeExpense(expenseId: number): Promise<ActionState> {
   await deleteExpense(admin.id, expenseId);
   revalidatePath("/admin", "layout");
   redirect("/admin/expenses");
+}
+
+export async function uploadAttachment(
+  expenseId: number,
+  _state: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const admin = await requireAdmin();
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return errorState("Choose a file to attach.", { file: "Required." });
+  }
+
+  try {
+    await addAttachment(admin.id, expenseId, {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      bytes: await file.arrayBuffer(),
+    });
+  } catch (error) {
+    if (error instanceof AttachmentError) return errorState(error.message, { file: error.message });
+    // A storage outage or a missing key should say so rather than crash the page.
+    console.error("[erp] attachment upload failed", error);
+    return errorState("The file could not be uploaded. Try again, or check the storage settings.");
+  }
+
+  revalidatePath("/admin", "layout");
+  return successState("Attachment added.");
+}
+
+export async function removeAttachmentAction(attachmentId: number): Promise<ActionState> {
+  const admin = await requireAdmin();
+  try {
+    await deleteAttachment(admin.id, attachmentId);
+  } catch (error) {
+    if (error instanceof AttachmentError) return errorState(error.message);
+    throw error;
+  }
+  revalidatePath("/admin", "layout");
+  return successState("Attachment removed.");
 }

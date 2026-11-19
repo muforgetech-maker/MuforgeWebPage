@@ -5,10 +5,12 @@ import { removeExpense } from "@/app/admin/_actions/expenses";
 import { ActionButton } from "@/components/erp/action-button";
 import { PageHeader } from "@/components/erp/ui";
 import { requireAdmin } from "@/lib/erp/auth";
+import { listAttachments } from "@/lib/erp/data/attachments";
 import { expenseCategories, expenseMethods, getExpense } from "@/lib/erp/data/expenses";
 import { todayIST } from "@/lib/erp/dates";
 import { parseId } from "@/lib/erp/form";
 import { ExpenseForm } from "../expense-form";
+import { AttachmentPanel } from "./attachment-panel";
 
 // Renders per request behind the login; see the ERP layout.
 export const instant = false;
@@ -20,6 +22,7 @@ export default async function EditExpensePage({ params }: PageProps<"/admin/expe
   const id = parseId((await params).id);
   const expense = id ? await getExpense(id) : null;
   if (!expense) notFound();
+  const attachments = await listAttachments(expense.id);
 
   return (
     <div className="max-w-3xl">
@@ -43,6 +46,7 @@ export default async function EditExpensePage({ params }: PageProps<"/admin/expe
         methods={expenseMethods}
         today={todayIST()}
       />
+      <AttachmentPanel expenseId={expense.id} attachments={attachments} />
     </div>
   );
 }

@@ -221,6 +221,15 @@ function CompanyFields({
           hint={`Numbers look like ${settings.invoicePrefix}/2026-27/0001 and restart each April.`}
         />
         <TextField
+          label="Delivery challan prefix"
+          name="challanPrefix"
+          defaultValue={settings.challanPrefix}
+          error={errorFor("challanPrefix")}
+          className="font-mono uppercase"
+          maxLength={4}
+          hint={`Challans run in their own series, ${settings.challanPrefix}/2026-27/0001.`}
+        />
+        <TextField
           label="Payment terms (days)"
           name="paymentTermsDays"
           type="number"
