@@ -101,6 +101,13 @@ export async function saveSettings(_state: ActionState, formData: FormData): Pro
     roundOff: form.checkbox("roundOff"),
     invoiceNotes: form.text("invoiceNotes", { label: "Default notes", max: 2000 }),
     invoiceTerms: form.text("invoiceTerms", { label: "Default terms", max: 2000 }),
+    strapline: form.text("strapline", { label: "Strapline", max: 80 }),
+    tagline: form.text("tagline", { label: "Tagline", max: 60 }),
+    instagram: form.text("instagram", { label: "Instagram handle", max: 40 }),
+    panelHeading: form.text("panelHeading", { label: "Panel heading", max: 80 }),
+    panelServices: form.text("panelServices", { label: "Services listed", max: 600 }),
+    panelQuote: form.text("panelQuote", { label: "Panel quote", max: 160 }),
+    footerLine: form.text("footerLine", { label: "Footer line", max: 120 }),
   };
 
   if (gstRegistered) {

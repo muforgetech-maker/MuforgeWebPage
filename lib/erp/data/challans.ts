@@ -139,6 +139,13 @@ function sellerFrom(settings: Settings): Seller {
     bankName: settings.bankName,
     bankBranch: settings.bankBranch,
     upiId: settings.upiId,
+    strapline: settings.strapline,
+    tagline: settings.tagline,
+    instagram: settings.instagram,
+    panelHeading: settings.panelHeading,
+    panelServices: settings.panelServices,
+    panelQuote: settings.panelQuote,
+    footerLine: settings.footerLine,
   };
 }
 

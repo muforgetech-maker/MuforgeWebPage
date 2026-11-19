@@ -53,7 +53,13 @@
   --paper-text: #14161b;
   --paper-muted: #565b66;
   --paper-border: #e4ded5;
-  --paper-accent: #be3f0b;
+  /* Documents carry the printed-stationery blue, not the site's ember:
+     they are handed to clients on their own, away from the website. */
+  --paper-accent: #1d4ed8; /* 6.4:1 on --paper */
+  --paper-brand: #15345e; /* table head and footer band */
+  --paper-brand-ink: #ffffff; /* 12.6:1 on --paper-brand */
+  --paper-soft: #eaf2fd; /* highlighted panels and total rows */
+  --paper-soft-border: #cfe0f7;
 
   /* Elevation — one soft level only -------------------------------------- */
   --shadow-soft: 0 1px 2px rgba(20, 22, 27, 0.04), 0 12px 32px rgba(20, 22, 27, 0.06);
@@ -143,6 +149,10 @@
   --color-paper-muted: var(--paper-muted);
   --color-paper-border: var(--paper-border);
   --color-paper-accent: var(--paper-accent);
+  --color-paper-brand: var(--paper-brand);
+  --color-paper-brand-ink: var(--paper-brand-ink);
+  --color-paper-soft: var(--paper-soft);
+  --color-paper-soft-border: var(--paper-soft-border);
 
   /* Type ----------------------------------------------------------------- */
   --font-display: var(--font-bricolage), "Segoe UI", system-ui, sans-serif;

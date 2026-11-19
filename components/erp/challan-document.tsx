@@ -1,30 +1,26 @@
-import Image from "next/image";
+import {
+  DocumentFooter,
+  DocumentHeader,
+  DocumentTitle,
+  PartyBlock,
+  ServicesPanel,
+  SignatureBlock,
+  TermsList,
+} from "@/components/erp/document-chrome";
 import type { ChallanDetail } from "@/lib/erp/data/challans";
-import type { Party } from "@/lib/erp/data/invoices";
 import { formatDate } from "@/lib/erp/dates";
 import { amountInWords, formatAmount, formatQuantity } from "@/lib/erp/money";
 
 /*
- * The delivery challan as a document, laid out to fill one A4 sheet. It uses
- * the same paper tokens as the invoice so the two look like one set of
- * stationery.
+ * The delivery challan as a document, on the same stationery as the invoice
+ * so the two read as one set.
  *
- * Rule 55 wants: a consecutive serial number and date, the consignor's and
- * consignee's names, addresses and GSTINs, a description with HSN/SAC and
- * quantity, the value of the consignment, the place of supply and a
- * signature. No tax is charged here -- the invoice that follows does that,
- * and the document says so plainly rather than leaving it to be assumed.
+ * Rule 55 wants: a consecutive serial number and date, both parties' names,
+ * addresses and GSTINs, a description with HSN/SAC and quantity, the value
+ * of the consignment, the place of supply and a signature. No tax is
+ * charged here -- the invoice that follows does that, and the document says
+ * so rather than leaving it to be assumed.
  */
-
-function addressLines(party: Party) {
-  return [
-    party.addressLine1,
-    party.addressLine2,
-    [party.city, party.pincode].filter(Boolean).join(" – "),
-    party.stateCode ? `${party.stateName} (${party.stateCode})` : "",
-  ].filter(Boolean);
-}
-
 export function ChallanDocument({ challan }: { challan: ChallanDetail }) {
   const { seller, billTo } = challan;
   const watermark =
@@ -34,7 +30,7 @@ export function ChallanDocument({ challan }: { challan: ChallanDetail }) {
   return (
     <article
       aria-label={`Delivery challan ${challan.number ?? "draft"}`}
-      className="relative mx-auto w-full max-w-[52rem] overflow-hidden rounded-card border border-border bg-paper p-6 text-[13px] leading-relaxed text-paper-text shadow-1 sm:p-10 print:max-w-none print:rounded-none print:border-0 print:p-0 print:shadow-none"
+      className="relative mx-auto w-full max-w-[52rem] overflow-hidden rounded-card border border-border bg-paper p-6 text-[13px] leading-relaxed text-paper-text shadow-1 sm:p-10 print:max-w-none print:rounded-none print:border-0 print:p-6 print:shadow-none"
     >
       {watermark && (
         <div
@@ -48,138 +44,84 @@ export function ChallanDocument({ challan }: { challan: ChallanDetail }) {
       )}
 
       <div className="relative">
-        {/* Consignor and challan meta */}
-        <header className="flex flex-col gap-6 border-b border-paper-border pb-6 sm:flex-row sm:justify-between">
-          <div className="min-w-0">
-            <div className="flex items-center gap-3">
-              <Image
-                src="/assets/muforge-logo-clean.png"
-                alt=""
-                width={661}
-                height={420}
-                className="h-10 w-auto"
-              />
-              <div>
-                <p className="font-display text-xl font-semibold leading-tight">{seller.name}</p>
-                {seller.legalName && seller.legalName !== seller.name && (
-                  <p className="text-xs text-paper-muted">{seller.legalName}</p>
-                )}
-              </div>
-            </div>
-            <div className="mt-3 text-xs text-paper-muted">
-              {addressLines(seller).map((line) => (
-                <p key={line}>{line}</p>
-              ))}
-              <p>{[seller.phone, seller.email].filter(Boolean).join(" · ")}</p>
-              {seller.website && <p>{seller.website.replace(/^https?:\/\//, "")}</p>}
-            </div>
-            {(seller.gstin || seller.pan) && (
-              <p className="mt-2 font-mono text-xs">
-                {seller.gstin && <span className="mr-4">GSTIN {seller.gstin}</span>}
-                {seller.pan && <span>PAN {seller.pan}</span>}
-              </p>
-            )}
-          </div>
+        <DocumentHeader seller={seller} />
 
-          <div className="sm:text-right">
-            <h2 className="font-display text-2xl font-semibold uppercase tracking-wide text-paper-accent">
-              Delivery Challan
-            </h2>
-            <dl className="mt-3 grid grid-cols-[auto_auto] justify-start gap-x-4 gap-y-0.5 text-xs sm:justify-end">
-              <dt className="text-paper-muted">Challan no.</dt>
-              <dd className="font-mono font-semibold">{challan.number ?? "Not yet issued"}</dd>
-              <dt className="text-paper-muted">Date</dt>
-              <dd>{formatDate(challan.challanDate)}</dd>
-              <dt className="text-paper-muted">Reason</dt>
-              <dd>{challan.reason}</dd>
-              <dt className="text-paper-muted">Place of supply</dt>
-              <dd>{challan.placeOfSupply}</dd>
-              {challan.vehicleNumber && (
-                <>
-                  <dt className="text-paper-muted">Vehicle no.</dt>
-                  <dd className="font-mono">{challan.vehicleNumber}</dd>
-                </>
-              )}
-              {challan.dispatchThrough && (
-                <>
-                  <dt className="text-paper-muted">Dispatched through</dt>
-                  <dd>{challan.dispatchThrough}</dd>
-                </>
-              )}
-            </dl>
-          </div>
-        </header>
+        <DocumentTitle
+          title="Delivery Challan"
+          subtitle="Not a tax invoice"
+          rows={[
+            {
+              label: "Challan No",
+              value: <span className="font-mono">{challan.number ?? "Not yet issued"}</span>,
+            },
+            { label: "Challan Date", value: formatDate(challan.challanDate) },
+            { label: "Reason", value: challan.reason },
+            { label: "Place of Supply", value: challan.placeOfSupply },
+            ...(challan.vehicleNumber
+              ? [
+                  {
+                    label: "Vehicle No",
+                    value: <span className="font-mono">{challan.vehicleNumber}</span>,
+                  },
+                ]
+              : []),
+            ...(challan.dispatchThrough
+              ? [{ label: "Dispatched Through", value: challan.dispatchThrough }]
+              : []),
+          ]}
+        />
 
-        {/* Consignee, and where it actually goes */}
-        <section className="grid gap-6 border-b border-paper-border py-6 sm:grid-cols-2">
-          <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-paper-muted">
-              Consignee
-            </h3>
-            <p className="mt-1.5 font-semibold">{billTo.name}</p>
-            {billTo.contactPerson && <p className="text-xs">{billTo.contactPerson}</p>}
-            <div className="mt-1 text-xs text-paper-muted">
-              {addressLines(billTo).map((line) => (
-                <p key={line}>{line}</p>
-              ))}
-              <p>{[billTo.phone, billTo.email].filter(Boolean).join(" · ")}</p>
-            </div>
-            {billTo.gstin && <p className="mt-1.5 font-mono text-xs">GSTIN {billTo.gstin}</p>}
-          </div>
-          <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-paper-muted">
-              Deliver to
-            </h3>
-            {challan.shipTo ? (
-              <p className="mt-1.5 whitespace-pre-line text-xs">{challan.shipTo}</p>
-            ) : (
-              <p className="mt-1.5 text-xs text-paper-muted">Same as the consignee address.</p>
-            )}
-          </div>
+        <section className="mt-8 grid gap-6 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
+          <PartyBlock title="Consignee" party={billTo} />
+          <ServicesPanel seller={seller} />
         </section>
 
+        {challan.shipTo && (
+          <section className="mt-5 rounded-card border border-paper-border p-4">
+            <h3 className="text-sm font-semibold text-paper-text">Deliver To</h3>
+            <p className="mt-1 whitespace-pre-line text-xs text-paper-muted">{challan.shipTo}</p>
+          </section>
+        )}
+
         {/* Items */}
-        <table className="w-full border-collapse text-xs">
+        <table className="mt-8 w-full border-collapse text-xs">
           <caption className="sr-only">Items in this consignment</caption>
           <thead>
-            <tr className="border-b border-paper-border text-paper-muted">
-              <th scope="col" className="py-2 pr-2 text-left font-semibold">
-                #
+            <tr className="bg-paper-brand text-paper-brand-ink">
+              <th scope="col" className="px-3 py-2.5 text-left font-semibold">
+                S.No
               </th>
-              <th scope="col" className="py-2 pr-2 text-left font-semibold">
-                Description
+              <th scope="col" className="px-3 py-2.5 text-left font-semibold">
+                Description of Goods
               </th>
-              <th scope="col" className="py-2 pr-2 text-left font-semibold">
-                SAC/HSN
+              <th scope="col" className="px-3 py-2.5 text-left font-semibold">
+                HSN/SAC
               </th>
-              <th scope="col" className="py-2 pr-2 text-right font-semibold">
+              <th scope="col" className="px-3 py-2.5 text-right font-semibold">
                 Qty
               </th>
-              <th scope="col" className="py-2 pr-2 text-left font-semibold">
-                Unit
+              <th scope="col" className="px-3 py-2.5 text-right font-semibold">
+                Rate (₹)
               </th>
-              <th scope="col" className="py-2 pr-2 text-right font-semibold">
-                Rate
-              </th>
-              <th scope="col" className="py-2 text-right font-semibold">
-                Value
+              <th scope="col" className="px-3 py-2.5 text-right font-semibold">
+                Value (₹)
               </th>
             </tr>
           </thead>
           <tbody>
             {challan.items.map((item, index) => (
               <tr key={item.id} className="border-b border-paper-border align-top">
-                <td className="py-2 pr-2 tabular-nums text-paper-muted">{index + 1}</td>
-                <td className="py-2 pr-2">{item.description}</td>
-                <td className="py-2 pr-2 font-mono">{item.sac || "—"}</td>
-                <td className="py-2 pr-2 text-right font-mono tabular-nums">
+                <td className="px-3 py-3 tabular-nums text-paper-muted">{index + 1}</td>
+                <td className="px-3 py-3 font-medium">{item.description}</td>
+                <td className="px-3 py-3 font-mono">{item.sac || "—"}</td>
+                <td className="px-3 py-3 text-right font-mono tabular-nums">
                   {formatQuantity(item.quantityMilli)}
+                  {item.unit && <span className="ml-1 text-paper-muted">{item.unit}</span>}
                 </td>
-                <td className="py-2 pr-2">{item.unit || "—"}</td>
-                <td className="py-2 pr-2 text-right font-mono tabular-nums">
+                <td className="px-3 py-3 text-right font-mono tabular-nums">
                   {formatAmount(item.ratePaise)}
                 </td>
-                <td className="py-2 text-right font-mono tabular-nums">
+                <td className="px-3 py-3 text-right font-mono font-semibold tabular-nums">
                   {formatAmount(item.amountPaise)}
                 </td>
               </tr>
@@ -187,60 +129,56 @@ export function ChallanDocument({ challan }: { challan: ChallanDetail }) {
           </tbody>
           <tfoot>
             <tr className="font-semibold">
-              <td colSpan={3} className="py-2.5">
+              <td colSpan={3} className="px-3 py-2.5">
                 Total
               </td>
-              <td className="py-2.5 pr-2 text-right font-mono tabular-nums">
+              <td className="px-3 py-2.5 text-right font-mono tabular-nums">
                 {formatQuantity(totalQuantityMilli)}
               </td>
-              <td colSpan={2} />
-              <td className="py-2.5 text-right font-mono tabular-nums">
+              <td />
+              <td className="px-3 py-2.5 text-right font-mono tabular-nums">
                 {formatAmount(challan.totalValuePaise)}
               </td>
             </tr>
           </tfoot>
         </table>
 
-        <p className="mt-2 text-xs text-paper-muted">
-          Value of consignment in words: {amountInWords(challan.totalValuePaise)}
-        </p>
-        <p className="mt-1 text-xs text-paper-muted">
-          This is a delivery challan, not a tax invoice. No GST is charged on this document; it is
-          charged on the invoice raised against this delivery.
-        </p>
-
-        {/* Notes, terms and signature */}
-        <section className="mt-6 grid gap-6 border-t border-paper-border pt-5 sm:grid-cols-[minmax(0,1fr)_14rem]">
-          <div className="grid gap-3 text-xs">
-            {challan.notes && (
-              <div>
-                <h3 className="font-semibold uppercase tracking-wide text-paper-muted">Notes</h3>
-                <p className="mt-1 whitespace-pre-line">{challan.notes}</p>
-              </div>
-            )}
-            {challan.terms && (
-              <div>
-                <h3 className="font-semibold uppercase tracking-wide text-paper-muted">Terms</h3>
-                <p className="mt-1 whitespace-pre-line">{challan.terms}</p>
-              </div>
-            )}
-            <div>
-              <h3 className="font-semibold uppercase tracking-wide text-paper-muted">
-                Received in good condition
-              </h3>
-              <div className="mt-8 border-t border-paper-border pt-1 text-paper-muted">
-                Consignee’s name and signature
-              </div>
-            </div>
+        <section className="mt-6 grid gap-6 sm:grid-cols-2 sm:items-start">
+          <div className="text-xs text-paper-muted">
+            <h3 className="text-xs font-semibold text-paper-text">Amount in Words</h3>
+            <p>{amountInWords(challan.totalValuePaise)}</p>
+            <p className="mt-3">
+              This is a delivery challan, not a tax invoice. No GST is charged on this document; it
+              is charged on the invoice raised against this delivery.
+            </p>
           </div>
 
-          <div className="text-xs sm:text-right">
-            <p className="text-paper-muted">For {seller.name}</p>
-            <div className="mt-12 border-t border-paper-border pt-1 text-paper-muted">
-              Authorised signatory
-            </div>
+          <div className="flex items-baseline justify-between gap-4 rounded-card bg-paper-soft px-4 py-3">
+            <p className="text-sm font-semibold">Value of Consignment (₹)</p>
+            <p className="font-mono text-xl font-bold tabular-nums">
+              {formatAmount(challan.totalValuePaise)}
+            </p>
           </div>
         </section>
+
+        {challan.notes && (
+          <p className="mt-6 whitespace-pre-line border-t border-paper-border pt-4 text-xs text-paper-muted">
+            {challan.notes}
+          </p>
+        )}
+
+        <section className="mt-6 grid gap-6 border-t border-paper-border pt-5 sm:grid-cols-3">
+          <div>
+            <h3 className="text-sm font-semibold text-paper-text">Received in Good Condition</h3>
+            <div className="mt-10 border-t border-paper-border pt-1.5 text-xs text-paper-muted">
+              Consignee’s name and signature
+            </div>
+          </div>
+          <TermsList terms={challan.terms} />
+          <SignatureBlock seller={seller} />
+        </section>
+
+        <DocumentFooter seller={seller} />
       </div>
     </article>
   );

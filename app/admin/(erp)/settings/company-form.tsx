@@ -260,6 +260,67 @@ function CompanyFields({
           error={errorFor("invoiceTerms")}
         />
       </FormSection>
+
+      <FormSection
+        title="Document branding"
+        description="The wording printed on invoices and delivery challans, around the figures."
+      >
+        <TextField
+          label="Strapline"
+          name="strapline"
+          defaultValue={settings.strapline}
+          error={errorFor("strapline")}
+          maxLength={80}
+          hint="Under your name in the header, for example “Custom Software & Digital Solutions”."
+        />
+        <TextField
+          label="Tagline"
+          name="tagline"
+          defaultValue={settings.tagline}
+          error={errorFor("tagline")}
+          maxLength={60}
+          hint="Beside the logo, for example “Build · Create · Grow”."
+        />
+        <TextField
+          label="Instagram handle"
+          name="instagram"
+          defaultValue={settings.instagram}
+          error={errorFor("instagram")}
+          maxLength={40}
+          hint="Optional, for example @mu.forge. Left blank, the line is not printed."
+        />
+        <TextField
+          label="Footer line"
+          name="footerLine"
+          defaultValue={settings.footerLine}
+          error={errorFor("footerLine")}
+          maxLength={120}
+          hint="Across the dark band at the foot of the page."
+        />
+        <TextField
+          label="Services panel heading"
+          name="panelHeading"
+          defaultValue={settings.panelHeading}
+          error={errorFor("panelHeading")}
+          maxLength={80}
+        />
+        <TextField
+          label="Services panel quote"
+          name="panelQuote"
+          defaultValue={settings.panelQuote}
+          error={errorFor("panelQuote")}
+          maxLength={160}
+        />
+        <TextAreaField
+          label="Services listed"
+          name="panelServices"
+          defaultValue={settings.panelServices}
+          error={errorFor("panelServices")}
+          rows={7}
+          wrapperClassName="sm:col-span-2"
+          hint="One per line. Leave empty to drop the panel from the document."
+        />
+      </FormSection>
     </>
   );
 }

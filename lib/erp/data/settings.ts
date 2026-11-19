@@ -35,6 +35,14 @@ export type Settings = {
   roundOff: boolean;
   invoiceNotes: string;
   invoiceTerms: string;
+  // Branding printed on invoices and challans.
+  strapline: string;
+  tagline: string;
+  instagram: string;
+  panelHeading: string;
+  panelServices: string;
+  panelQuote: string;
+  footerLine: string;
 };
 
 type SettingsRow = Omit<Settings, "gstRegistered" | "roundOff"> & {
@@ -54,7 +62,10 @@ export async function getSettings(): Promise<Settings> {
             challan_prefix AS "challanPrefix",
             payment_terms_days AS "paymentTermsDays", default_sac AS "defaultSac",
             default_tax_rate_bp AS "defaultTaxRateBp", round_off AS "roundOff",
-            invoice_notes AS "invoiceNotes", invoice_terms AS "invoiceTerms"
+            invoice_notes AS "invoiceNotes", invoice_terms AS "invoiceTerms",
+            strapline, tagline, instagram, panel_heading AS "panelHeading",
+            panel_services AS "panelServices", panel_quote AS "panelQuote",
+            footer_line AS "footerLine"
        FROM settings WHERE id = 1`,
   );
   if (!row) throw new Error("ERP settings row is missing.");
@@ -76,6 +87,9 @@ export async function updateSettings(userId: number, values: Settings) {
          payment_terms_days = @paymentTermsDays, default_sac = @defaultSac,
          default_tax_rate_bp = @defaultTaxRateBp, round_off = @roundOff,
          invoice_notes = @invoiceNotes, invoice_terms = @invoiceTerms,
+         strapline = @strapline, tagline = @tagline, instagram = @instagram,
+         panel_heading = @panelHeading, panel_services = @panelServices,
+         panel_quote = @panelQuote, footer_line = @footerLine,
          updated_at = erp_now()
        WHERE id = 1`,
       { ...values, gstRegistered: values.gstRegistered ? 1 : 0, roundOff: values.roundOff ? 1 : 0 },

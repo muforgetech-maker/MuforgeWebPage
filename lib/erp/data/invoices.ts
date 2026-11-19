@@ -61,6 +61,15 @@ export type Seller = Party & {
   bankName: string;
   bankBranch: string;
   upiId: string;
+  // Document branding travels in the snapshot too, so a document reprinted
+  // years later still looks like the one that was sent.
+  strapline: string;
+  tagline: string;
+  instagram: string;
+  panelHeading: string;
+  panelServices: string;
+  panelQuote: string;
+  footerLine: string;
 };
 
 export type InvoiceInput = {
@@ -155,6 +164,13 @@ function sellerFrom(settings: Settings): Seller {
     bankName: settings.bankName,
     bankBranch: settings.bankBranch,
     upiId: settings.upiId,
+    strapline: settings.strapline,
+    tagline: settings.tagline,
+    instagram: settings.instagram,
+    panelHeading: settings.panelHeading,
+    panelServices: settings.panelServices,
+    panelQuote: settings.panelQuote,
+    footerLine: settings.footerLine,
   };
 }
 
