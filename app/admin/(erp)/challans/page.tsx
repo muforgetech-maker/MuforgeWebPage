@@ -35,7 +35,7 @@ export default async function ChallansPage({ searchParams }: PageProps<"/admin/c
   const counts = new Map<string, number>();
   for (const challan of all) counts.set(challan.status, (counts.get(challan.status) ?? 0) + 1);
   const challans = status === "all" ? all : all.filter((challan) => challan.status === status);
-  const totalValue = challans.reduce((sum, challan) => sum + challan.totalValuePaise, 0);
+  const totalValue = challans.reduce((sum, challan) => sum + challan.totalPaise, 0);
 
   const tabHref = (value: string) => {
     const search = new URLSearchParams();
@@ -134,7 +134,7 @@ export default async function ChallansPage({ searchParams }: PageProps<"/admin/c
                 <th scope="col">Reason</th>
                 <th scope="col">Status</th>
                 <th scope="col" className="text-right">
-                  Value
+                  Value incl. GST
                 </th>
                 <th scope="col">Invoice</th>
               </tr>
@@ -156,7 +156,7 @@ export default async function ChallansPage({ searchParams }: PageProps<"/admin/c
                     <Badge tone={statusTone[challan.status]}>{challan.status}</Badge>
                   </td>
                   <td className="erp-num">
-                    <Money paise={challan.totalValuePaise} />
+                    <Money paise={challan.totalPaise} />
                   </td>
                   <td className="whitespace-nowrap">
                     {challan.invoiceId ? (

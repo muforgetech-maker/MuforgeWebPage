@@ -9,6 +9,7 @@ import { getSettings } from "@/lib/erp/data/settings";
 import { parseId } from "@/lib/erp/form";
 import { paiseToInput } from "@/lib/erp/money";
 import { ChallanEditor } from "../../challan-editor";
+import { challanEditorSettings } from "../../editor-settings";
 
 // Renders per request behind the login; see the ERP layout.
 export const instant = false;
@@ -38,6 +39,15 @@ export default async function EditChallanPage({ params }: PageProps<"/admin/chal
     });
   }
 
+  // A challan saved before tax was shown on challans has 0% on every line. A
+  // draft of that kind starts at the default rate, since it has not gone
+  // anywhere yet; an issued one keeps 0% until someone deliberately changes
+  // it, so correcting a typo never adds tax to a document already handed over.
+  const legacyDraftRateBp =
+    challan.taxMode === "none" && challan.status === "draft" && settings.gstRegistered
+      ? settings.defaultTaxRateBp
+      : null;
+
   return (
     <div className="max-w-5xl">
       <PageHeader
@@ -48,7 +58,7 @@ export default async function EditChallanPage({ params }: PageProps<"/admin/chal
         action={saveChallan.bind(null, challan.id)}
         clients={clients}
         reasons={challanReasons}
-        defaultSac={settings.defaultSac}
+        settings={challanEditorSettings(settings)}
         mode={challan.status === "issued" ? "issued" : "draft"}
         cancelHref={`/admin/challans/${challan.id}`}
         initial={{
@@ -67,6 +77,7 @@ export default async function EditChallanPage({ params }: PageProps<"/admin/chal
             quantity: String(item.quantityMilli / 1000),
             unit: item.unit,
             rate: paiseToInput(item.ratePaise),
+            taxRateBp: String(legacyDraftRateBp ?? item.taxRateBp),
           })),
         }}
       />

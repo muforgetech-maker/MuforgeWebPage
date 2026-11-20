@@ -6,13 +6,15 @@ import {
   PaymentDetails,
   ServicesPanel,
   SignatureBlock,
+  singleTaxRate,
+  TaxSummary,
+  taxRows,
   TermsList,
+  TotalsBlock,
 } from "@/components/erp/document-chrome";
 import type { InvoiceDetail } from "@/lib/erp/data/invoices";
 import { formatDate } from "@/lib/erp/dates";
-import { formatRateBp } from "@/lib/erp/gst";
-import { computeInvoiceTotals } from "@/lib/erp/invoice-calc";
-import { amountInWords, formatAmount, formatQuantity } from "@/lib/erp/money";
+import { formatAmount, formatQuantity } from "@/lib/erp/money";
 
 /*
  * The invoice as a document, laid out to fill one A4 sheet when printed or
@@ -21,52 +23,16 @@ import { amountInWords, formatAmount, formatQuantity } from "@/lib/erp/money";
  *
  * Carries what a GST invoice needs: both GSTINs, a consecutive number, the
  * date, place of supply, SAC/HSN per line, taxable value, rate-wise tax
- * split into CGST/SGST or IGST, and the total in words.
+ * split into CGST/SGST or IGST, and the total in words. The tax summary and
+ * totals are shared with the delivery challan (document-chrome.tsx).
  */
-
-type TaxRow = { label: string; rateBp: number; paise: number };
-
-/**
- * One row per tax actually charged.
- *
- * Within the seller's state a rate is halved into CGST and SGST; across
- * states it is one IGST line. Rates are listed separately rather than
- * merged, because a GST return needs them that way.
- */
-function taxRows(invoice: InvoiceDetail): TaxRow[] {
-  const groups = computeInvoiceTotals(invoice.items, invoice.taxMode, false).taxGroups.filter(
-    (group) => group.rateBp > 0,
-  );
-
-  if (invoice.taxMode === "intra") {
-    return groups.flatMap((group) => [
-      { label: "CGST", rateBp: group.rateBp / 2, paise: group.cgstPaise },
-      { label: "SGST", rateBp: group.rateBp / 2, paise: group.sgstPaise },
-    ]);
-  }
-  if (invoice.taxMode === "inter") {
-    return groups.map((group) => ({
-      label: "IGST",
-      rateBp: group.rateBp,
-      paise: group.igstPaise,
-    }));
-  }
-  return [];
-}
-
 export function InvoiceDocument({ invoice }: { invoice: InvoiceDetail }) {
   const { seller, billTo } = invoice;
   const gst = invoice.gstRegistered;
-  const rows = taxRows(invoice);
+  const rows = taxRows(invoice.items, invoice.taxMode);
   const taxPaise = invoice.cgstPaise + invoice.sgstPaise + invoice.igstPaise;
   const watermark = invoice.status === "draft" ? "DRAFT" : invoice.status === "void" ? "VOID" : null;
-
-  // The single-rate case, which is almost every invoice, can state the rate
-  // on the "Add: GST" line instead of leaving it to be worked out.
-  const singleRateBp =
-    new Set(invoice.items.map((item) => item.taxRateBp).filter((bp) => bp > 0)).size === 1
-      ? invoice.items.find((item) => item.taxRateBp > 0)?.taxRateBp
-      : undefined;
+  const singleRateBp = singleTaxRate(invoice.items);
 
   return (
     <article
@@ -154,49 +120,12 @@ export function InvoiceDocument({ invoice }: { invoice: InvoiceDetail }) {
         {/* Tax summary and totals */}
         <section className="mt-6 grid gap-6 sm:grid-cols-2 sm:items-start">
           {gst && rows.length > 0 ? (
-            <div className="overflow-hidden rounded-card border border-paper-soft-border">
-              <h3 className="bg-paper-soft px-4 py-2.5 text-sm font-semibold text-paper-text">
-                Tax Summary
-              </h3>
-              <table className="w-full border-collapse text-xs">
-                <caption className="sr-only">Tax charged, by type and rate</caption>
-                <thead>
-                  <tr className="border-y border-paper-soft-border text-paper-muted">
-                    <th scope="col" className="px-4 py-2 text-left font-semibold">
-                      Tax Type
-                    </th>
-                    <th scope="col" className="px-4 py-2 text-left font-semibold">
-                      Rate
-                    </th>
-                    <th scope="col" className="px-4 py-2 text-right font-semibold">
-                      Amount (₹)
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((row, index) => (
-                    <tr key={`${row.label}-${row.rateBp}-${index}`} className="border-b border-paper-soft-border">
-                      <td className="px-4 py-2">{row.label}</td>
-                      <td className="px-4 py-2 tabular-nums">{formatRateBp(row.rateBp)}</td>
-                      <td className="px-4 py-2 text-right font-mono tabular-nums">
-                        {formatAmount(row.paise)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr className="bg-paper-soft font-semibold">
-                    <td className="px-4 py-2.5">Total GST</td>
-                    <td className="px-4 py-2.5 tabular-nums">
-                      {singleRateBp ? formatRateBp(singleRateBp) : "—"}
-                    </td>
-                    <td className="px-4 py-2.5 text-right font-mono tabular-nums">
-                      {formatAmount(taxPaise)}
-                    </td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
+            <TaxSummary
+              rows={rows}
+              totalTaxPaise={taxPaise}
+              singleRateBp={singleRateBp}
+              caption="Tax charged, by type and rate"
+            />
           ) : (
             <p className="self-start text-xs text-paper-muted">
               {gst
@@ -205,43 +134,16 @@ export function InvoiceDocument({ invoice }: { invoice: InvoiceDetail }) {
             </p>
           )}
 
-          <div>
-            <dl className="grid gap-2 text-sm">
-              <div className="flex items-baseline justify-between gap-4">
-                <dt className="text-paper-muted">Total Amount (Before Tax)</dt>
-                <dd className="font-mono tabular-nums">{formatAmount(invoice.subtotalPaise)}</dd>
-              </div>
-              {gst && (
-                <div className="flex items-baseline justify-between gap-4">
-                  <dt className="text-paper-muted">
-                    Add: GST{singleRateBp ? ` (${formatRateBp(singleRateBp)})` : ""}
-                  </dt>
-                  <dd className="font-mono tabular-nums">{formatAmount(taxPaise)}</dd>
-                </div>
-              )}
-              {invoice.roundOffPaise !== 0 && (
-                <div className="flex items-baseline justify-between gap-4">
-                  <dt className="text-paper-muted">Round off</dt>
-                  <dd className="font-mono tabular-nums">
-                    {invoice.roundOffPaise > 0 ? "+" : ""}
-                    {formatAmount(invoice.roundOffPaise)}
-                  </dd>
-                </div>
-              )}
-            </dl>
-
-            <div className="mt-3 flex items-baseline justify-between gap-4 rounded-card bg-paper-soft px-4 py-3">
-              <p className="text-sm font-semibold">Total Amount (₹)</p>
-              <p className="font-mono text-xl font-bold tabular-nums">
-                {formatAmount(invoice.totalPaise)}
-              </p>
-            </div>
-
-            <div className="mt-3">
-              <h3 className="text-xs font-semibold text-paper-text">Amount in Words</h3>
-              <p className="text-xs text-paper-muted">{amountInWords(invoice.totalPaise)}</p>
-            </div>
-          </div>
+          <TotalsBlock
+            subtotalLabel="Total Amount (Before Tax)"
+            subtotalPaise={invoice.subtotalPaise}
+            showTax={gst}
+            taxPaise={taxPaise}
+            singleRateBp={singleRateBp}
+            roundOffPaise={invoice.roundOffPaise}
+            totalLabel="Total Amount (₹)"
+            totalPaise={invoice.totalPaise}
+          />
         </section>
 
         {invoice.notes && (

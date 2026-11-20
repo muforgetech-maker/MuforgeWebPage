@@ -120,15 +120,35 @@ export default async function ChallanPage({ params }: PageProps<"/admin/challans
                 <dt className="text-text-muted">Reason</dt>
                 <dd>{challan.reason}</dd>
               </div>
+              {challan.taxMode !== "none" && (
+                <>
+                  <div className="flex justify-between">
+                    <dt className="text-text-muted">Value before tax</dt>
+                    <dd>
+                      <Money paise={challan.totalValuePaise} />
+                    </dd>
+                  </div>
+                  <div className="flex justify-between">
+                    <dt className="text-text-muted">
+                      {challan.taxMode === "intra" ? "CGST + SGST" : "IGST"}
+                    </dt>
+                    <dd>
+                      <Money paise={challan.cgstPaise + challan.sgstPaise + challan.igstPaise} />
+                    </dd>
+                  </div>
+                </>
+              )}
               <div className="flex justify-between border-t border-border pt-2 font-semibold">
                 <dt>Total value</dt>
                 <dd>
-                  <Money paise={challan.totalValuePaise} />
+                  <Money paise={challan.totalPaise} />
                 </dd>
               </div>
             </dl>
             <p className="mt-3 text-xs text-text-muted">
-              A challan carries no tax. GST is charged on the invoice raised against it.
+              {challan.taxMode !== "none"
+                ? "GST is shown on the challan as the rules ask. It is charged, and reported, on the invoice raised against it."
+                : "Saved without tax. Edit it to set GST rates, or raise the invoice, which adds GST."}
             </p>
           </section>
 

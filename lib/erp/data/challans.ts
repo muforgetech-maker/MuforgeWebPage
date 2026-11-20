@@ -2,7 +2,12 @@ import "server-only";
 import { financialYear, todayIST } from "@/lib/erp/dates";
 import { all, audit, insert, one, run, transaction } from "@/lib/erp/db";
 import { stateName } from "@/lib/erp/gst";
-import { lineAmount } from "@/lib/erp/invoice-calc";
+import {
+  computeInvoiceTotals,
+  taxModeFor,
+  type LineInput,
+  type TaxMode,
+} from "@/lib/erp/invoice-calc";
 import { getClient } from "@/lib/erp/data/clients";
 import { createInvoice, type Party, type Seller } from "@/lib/erp/data/invoices";
 import { getSettings, type Settings } from "@/lib/erp/data/settings";
@@ -12,8 +17,11 @@ import { getSettings, type Settings } from "@/lib/erp/data/settings";
  *
  * A challan accompanies goods or deliverables that move before they are
  * billed -- job work, supply on approval, a handover ahead of the invoice.
- * It states a value so the consignment can be accounted for in transit, but
- * it charges no tax: the invoice that follows does that.
+ * It states the value of the consignment and, as GST Rule 55(2)(f) asks for
+ * a movement that is a supply, the tax on it: rate-wise CGST + SGST inside
+ * the seller's state or IGST across states, worked out exactly as an invoice
+ * does. It is still not a tax invoice. The tax is charged, and reported, on
+ * the invoice raised afterwards; challans never count in the GST reports.
  *
  * The lifecycle mirrors invoices on purpose, so the two read the same way.
  * A draft carries no number and can be changed or deleted freely. Issuing
@@ -39,13 +47,8 @@ export const challanReasons = [
 
 export type ChallanReason = (typeof challanReasons)[number];
 
-export type ChallanLineInput = {
-  description: string;
-  sac: string;
-  quantityMilli: number;
-  unit: string;
-  ratePaise: number;
-};
+/** A challan line is an invoice line: same fields, same rounding, same tax. */
+export type ChallanLineInput = LineInput;
 
 export type ChallanItem = ChallanLineInput & { id: number; amountPaise: number };
 
@@ -71,6 +74,8 @@ export type ChallanListRow = {
   challanDate: string;
   reason: string;
   totalValuePaise: number;
+  /** Value plus tax plus round-off. */
+  totalPaise: number;
   invoiceId: number | null;
   invoiceNumber: string | null;
 };
@@ -88,7 +93,15 @@ export type ChallanDetail = {
   shipTo: string;
   notes: string;
   terms: string;
+  /** The taxable value: quantity × rate, summed over the lines. */
   totalValuePaise: number;
+  taxMode: TaxMode;
+  cgstPaise: number;
+  sgstPaise: number;
+  igstPaise: number;
+  roundOffPaise: number;
+  /** Value plus tax plus round-off. */
+  totalPaise: number;
   invoiceId: number | null;
   invoiceNumber: string | null;
   issuedAt: string | null;
@@ -101,14 +114,31 @@ export type ChallanDetail = {
   items: ChallanItem[];
 };
 
-function totalsFor(lines: ChallanLineInput[]) {
-  // Same rounding as an invoice line, so a challan and the invoice raised
-  // from it never disagree by a paisa.
-  const priced = lines.map((line) => ({
-    ...line,
-    amountPaise: lineAmount(line.quantityMilli, line.ratePaise),
-  }));
-  return { lines: priced, totalValuePaise: priced.reduce((sum, l) => sum + l.amountPaise, 0) };
+/**
+ * Prices the lines and works out the tax, with the invoice's own arithmetic
+ * and the current settings: the tax split follows the place of supply, an
+ * unregistered business charges none, and the total is rounded the same way.
+ * A challan and the invoice raised from it therefore never disagree by a
+ * paisa.
+ */
+function totalsFor(lines: ChallanLineInput[], settings: Settings, placeOfSupply: string) {
+  const mode = taxModeFor(settings.gstRegistered, settings.stateCode, placeOfSupply);
+  return { mode, totals: computeInvoiceTotals(lines, mode, settings.roundOff) };
+}
+
+type Totals = ReturnType<typeof totalsFor>;
+
+/** The stored tax columns, in the order the UPDATE/INSERT statements list them. */
+function taxColumns({ mode, totals }: Totals) {
+  return [
+    totals.subtotalPaise,
+    mode,
+    totals.cgstPaise,
+    totals.sgstPaise,
+    totals.igstPaise,
+    totals.roundOffPaise,
+    totals.totalPaise,
+  ] as const;
 }
 
 // ---------------------------------------------------------------------------
@@ -182,7 +212,7 @@ export async function listChallans(filter: ChallanFilter = {}): Promise<ChallanL
   const rows = await all<ChallanListRow>(
     `SELECT d.id, d.number, d.status, d.client_id AS "clientId", c.name AS "clientName",
             d.challan_date AS "challanDate", d.reason,
-            d.total_value_paise AS "totalValuePaise",
+            d.total_value_paise AS "totalValuePaise", d.total_paise AS "totalPaise",
             d.invoice_id AS "invoiceId", i.number AS "invoiceNumber"
        FROM delivery_challans d
        JOIN clients c ON c.id = d.client_id
@@ -207,7 +237,9 @@ export async function getChallan(id: number): Promise<ChallanDetail | null> {
             d.challan_date AS "challanDate", d.reason, d.place_of_supply AS "placeOfSupply",
             d.vehicle_number AS "vehicleNumber", d.dispatch_through AS "dispatchThrough",
             d.ship_to AS "shipTo", d.notes, d.terms,
-            d.total_value_paise AS "totalValuePaise",
+            d.total_value_paise AS "totalValuePaise", d.tax_mode AS "taxMode",
+            d.cgst_paise AS "cgstPaise", d.sgst_paise AS "sgstPaise", d.igst_paise AS "igstPaise",
+            d.round_off_paise AS "roundOffPaise", d.total_paise AS "totalPaise",
             d.invoice_id AS "invoiceId", i.number AS "invoiceNumber",
             d.issued_at AS "issuedAt", d.cancelled_at AS "cancelledAt",
             d.cancel_reason AS "cancelReason",
@@ -222,7 +254,7 @@ export async function getChallan(id: number): Promise<ChallanDetail | null> {
 
   const items = await all<ChallanItem>(
     `SELECT id, description, sac, quantity_milli AS "quantityMilli", unit,
-            rate_paise AS "ratePaise", amount_paise AS "amountPaise"
+            rate_paise AS "ratePaise", tax_rate_bp AS "taxRateBp", amount_paise AS "amountPaise"
        FROM delivery_challan_items WHERE challan_id = ? ORDER BY position`,
     id,
   );
@@ -254,15 +286,15 @@ function invoiceLabel(challan: Pick<ChallanDetail, "invoiceNumber">) {
 // Writes
 // ---------------------------------------------------------------------------
 
-async function writeItems(challanId: number, lines: ChallanItem[] | ReturnType<typeof totalsFor>["lines"]) {
+async function writeItems(challanId: number, lines: Totals["totals"]["lines"]) {
   await run("DELETE FROM delivery_challan_items WHERE challan_id = ?", challanId);
   // Sequential: these share the caller's transaction, which is one
   // connection, so the inserts cannot be issued concurrently.
   for (const [position, line] of lines.entries()) {
     await run(
       `INSERT INTO delivery_challan_items (challan_id, position, description, sac,
-         quantity_milli, unit, rate_paise, amount_paise)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+         quantity_milli, unit, rate_paise, tax_rate_bp, amount_paise)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       challanId,
       position,
       line.description,
@@ -270,9 +302,22 @@ async function writeItems(challanId: number, lines: ChallanItem[] | ReturnType<t
       line.quantityMilli,
       line.unit,
       line.ratePaise,
+      line.taxRateBp,
       line.amountPaise,
     );
   }
+}
+
+/** Saves the lines and the figures worked out from them. */
+async function writeTotals(challanId: number, computed: Totals) {
+  await writeItems(challanId, computed.totals.lines);
+  await run(
+    `UPDATE delivery_challans SET total_value_paise = ?, tax_mode = ?, cgst_paise = ?,
+       sgst_paise = ?, igst_paise = ?, round_off_paise = ?, total_paise = ?
+     WHERE id = ?`,
+    ...taxColumns(computed),
+    challanId,
+  );
 }
 
 async function nextChallanNumber(prefix: string, challanDate: string) {
@@ -297,6 +342,9 @@ async function issueInPlace(userId: number, id: number) {
   const settings = await getSettings();
   const number = await nextChallanNumber(settings.challanPrefix, challan.challanDate);
 
+  // Recompute with today's settings, as an invoice does, in case GST
+  // registration or rounding changed while this sat as a draft.
+  await writeTotals(id, totalsFor(challan.items, settings, challan.placeOfSupply));
   await run(
     `UPDATE delivery_challans SET status = 'issued', number = ?,
        bill_to_json = ?, seller_json = ?, issued_at = erp_now(), updated_at = erp_now()
@@ -312,11 +360,12 @@ async function issueInPlace(userId: number, id: number) {
 
 export async function createChallan(userId: number, input: ChallanInput, issue: boolean) {
   return await transaction(async () => {
-    const totals = totalsFor(input.lines);
+    const computed = totalsFor(input.lines, await getSettings(), input.placeOfSupply);
     const id = await insert(
       `INSERT INTO delivery_challans (status, client_id, challan_date, reason, place_of_supply,
-         vehicle_number, dispatch_through, ship_to, notes, terms, total_value_paise, created_by)
-       VALUES ('draft', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         vehicle_number, dispatch_through, ship_to, notes, terms, total_value_paise, tax_mode,
+         cgst_paise, sgst_paise, igst_paise, round_off_paise, total_paise, created_by)
+       VALUES ('draft', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       input.clientId,
       input.challanDate,
       input.reason,
@@ -326,10 +375,10 @@ export async function createChallan(userId: number, input: ChallanInput, issue: 
       input.shipTo,
       input.notes,
       input.terms,
-      totals.totalValuePaise,
+      ...taxColumns(computed),
       userId,
     );
-    await writeItems(id, totals.lines);
+    await writeItems(id, computed.totals.lines);
     await audit(userId, "create", "challan", id, "Draft created");
     if (issue) await issueInPlace(userId, id);
     return id;
@@ -356,11 +405,10 @@ export async function updateChallan(userId: number, id: number, input: ChallanIn
       );
     }
 
-    const totals = totalsFor(input.lines);
     await run(
       `UPDATE delivery_challans SET client_id = ?, challan_date = ?, reason = ?,
          place_of_supply = ?, vehicle_number = ?, dispatch_through = ?, ship_to = ?,
-         notes = ?, terms = ?, total_value_paise = ?, updated_at = erp_now()
+         notes = ?, terms = ?, updated_at = erp_now()
        WHERE id = ?`,
       input.clientId,
       input.challanDate,
@@ -371,10 +419,9 @@ export async function updateChallan(userId: number, id: number, input: ChallanIn
       input.shipTo,
       input.notes,
       input.terms,
-      totals.totalValuePaise,
       id,
     );
-    await writeItems(id, totals.lines);
+    await writeTotals(id, totalsFor(input.lines, await getSettings(), input.placeOfSupply));
 
     // An issued challan has already gone out with the consignment, so the
     // snapshot is refreshed to match what the corrected document now says.
@@ -431,8 +478,11 @@ export async function deleteDraftChallan(userId: number, id: number) {
  * Raises a draft invoice carrying this challan's lines.
  *
  * The challan records which invoice it became, so the same consignment
- * cannot be billed twice by accident. Tax is worked out by the invoice from
- * the current settings; the challan itself never carried any.
+ * cannot be billed twice by accident. Each line keeps the GST rate it shows
+ * on the challan, so the invoice charges the tax the challan stated. A
+ * challan saved without tax -- one from before tax was shown on challans,
+ * or one written while the business was unregistered -- falls back to the
+ * default rate, which is what every invoice raised from a challan used to get.
  */
 export async function invoiceFromChallan(userId: number, id: number, dueDate: string) {
   return await transaction(async () => {
@@ -447,6 +497,9 @@ export async function invoiceFromChallan(userId: number, id: number, dueDate: st
     if (challan.items.length === 0) throw new ChallanError("This challan has no lines.");
 
     const settings = await getSettings();
+    const defaultRateBp = settings.gstRegistered ? settings.defaultTaxRateBp : 0;
+    const rateFor = (item: ChallanItem) =>
+      challan.taxMode === "none" ? defaultRateBp : item.taxRateBp;
     const invoiceId = await createInvoice(
       userId,
       {
@@ -462,7 +515,7 @@ export async function invoiceFromChallan(userId: number, id: number, dueDate: st
           quantityMilli: item.quantityMilli,
           unit: item.unit,
           ratePaise: item.ratePaise,
-          taxRateBp: settings.gstRegistered ? settings.defaultTaxRateBp : 0,
+          taxRateBp: rateFor(item),
         })),
       },
       false,

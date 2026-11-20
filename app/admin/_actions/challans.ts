@@ -20,7 +20,7 @@ import { getClient } from "@/lib/erp/data/clients";
 import { getSettings } from "@/lib/erp/data/settings";
 import { addDays, todayIST } from "@/lib/erp/dates";
 import { errorState, FormReader, successState, type ActionState } from "@/lib/erp/form";
-import { indianStates } from "@/lib/erp/gst";
+import { gstRatesBp, indianStates } from "@/lib/erp/gst";
 import { parseQuantityToMilli, parseRupeesToPaise } from "@/lib/erp/money";
 
 const stateCodes = indianStates.map((state) => state.code);
@@ -33,6 +33,7 @@ type RawLine = {
   quantity?: unknown;
   unit?: unknown;
   rate?: unknown;
+  taxRateBp?: unknown;
 };
 
 function readLines(form: FormReader): ChallanLineInput[] {
@@ -76,12 +77,21 @@ function readLines(form: FormReader): ChallanLineInput[] {
     const ratePaise = rateText === "" ? 0 : parseRupeesToPaise(rateText);
     if (ratePaise === null) form.fail(key("rate"), "Value must be an amount like 1500 or 1500.50.");
 
+    // The editor omits the rate when the business is not GST registered; the
+    // tax arithmetic charges nothing then whatever a line says.
+    const taxText = str(line.taxRateBp);
+    const taxRateBp = taxText === "" ? 0 : Number(taxText);
+    if (!(gstRatesBp as readonly number[]).includes(taxRateBp)) {
+      form.fail(key("taxRateBp"), "Choose a GST rate.");
+    }
+
     return {
       description,
       sac,
       quantityMilli: quantityMilli ?? 1000,
       unit: str(line.unit).slice(0, 20),
       ratePaise: ratePaise ?? 0,
+      taxRateBp: Number.isFinite(taxRateBp) ? taxRateBp : 0,
     };
   });
 }

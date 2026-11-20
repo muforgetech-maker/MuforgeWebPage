@@ -5,27 +5,40 @@ import {
   PartyBlock,
   ServicesPanel,
   SignatureBlock,
+  singleTaxRate,
+  TaxSummary,
+  taxRows,
   TermsList,
+  TotalsBlock,
 } from "@/components/erp/document-chrome";
 import type { ChallanDetail } from "@/lib/erp/data/challans";
 import { formatDate } from "@/lib/erp/dates";
-import { amountInWords, formatAmount, formatQuantity } from "@/lib/erp/money";
+import { formatAmount, formatQuantity } from "@/lib/erp/money";
 
 /*
  * The delivery challan as a document, on the same stationery as the invoice
  * so the two read as one set.
  *
  * Rule 55 wants: a consecutive serial number and date, both parties' names,
- * addresses and GSTINs, a description with HSN/SAC and quantity, the value
- * of the consignment, the place of supply and a signature. No tax is
- * charged here -- the invoice that follows does that, and the document says
- * so rather than leaving it to be assumed.
+ * addresses and GSTINs, a description with HSN/SAC and quantity, the taxable
+ * value, the tax rate and amount (CGST + SGST, or IGST) where the movement
+ * is a supply, the place of supply and a signature. The tax summary and
+ * totals are the invoice's own, so the two documents state the same figures
+ * the same way. It is still not a tax invoice, and says so: the tax is
+ * charged on the invoice that follows.
+ *
+ * A challan saved before tax was shown on challans has tax mode "none" and
+ * prints as it always did, with the value alone.
  */
 export function ChallanDocument({ challan }: { challan: ChallanDetail }) {
   const { seller, billTo } = challan;
   const watermark =
     challan.status === "draft" ? "DRAFT" : challan.status === "cancelled" ? "CANCELLED" : null;
   const totalQuantityMilli = challan.items.reduce((sum, item) => sum + item.quantityMilli, 0);
+  const taxed = challan.taxMode !== "none";
+  const rows = taxRows(challan.items, challan.taxMode);
+  const taxPaise = challan.cgstPaise + challan.sgstPaise + challan.igstPaise;
+  const singleRateBp = singleTaxRate(challan.items);
 
   return (
     <article
@@ -104,7 +117,7 @@ export function ChallanDocument({ challan }: { challan: ChallanDetail }) {
                 Rate (₹)
               </th>
               <th scope="col" className="px-3 py-2.5 text-right font-semibold">
-                Value (₹)
+                {taxed ? "Taxable Value (₹)" : "Value (₹)"}
               </th>
             </tr>
           </thead>
@@ -143,23 +156,39 @@ export function ChallanDocument({ challan }: { challan: ChallanDetail }) {
           </tfoot>
         </table>
 
+        {/* Tax summary and totals: the invoice's own blocks */}
         <section className="mt-6 grid gap-6 sm:grid-cols-2 sm:items-start">
-          <div className="text-xs text-paper-muted">
-            <h3 className="text-xs font-semibold text-paper-text">Amount in Words</h3>
-            <p>{amountInWords(challan.totalValuePaise)}</p>
-            <p className="mt-3">
-              This is a delivery challan, not a tax invoice. No GST is charged on this document; it
-              is charged on the invoice raised against this delivery.
+          {taxed && rows.length > 0 ? (
+            <TaxSummary
+              rows={rows}
+              totalTaxPaise={taxPaise}
+              singleRateBp={singleRateBp}
+              caption="Tax on this consignment, by type and rate"
+            />
+          ) : (
+            <p className="self-start text-xs text-paper-muted">
+              {taxed ? "No GST applies to the items above." : "No GST is shown on this challan."}
             </p>
-          </div>
+          )}
 
-          <div className="flex items-baseline justify-between gap-4 rounded-card bg-paper-soft px-4 py-3">
-            <p className="text-sm font-semibold">Value of Consignment (₹)</p>
-            <p className="font-mono text-xl font-bold tabular-nums">
-              {formatAmount(challan.totalValuePaise)}
-            </p>
-          </div>
+          <TotalsBlock
+            subtotalLabel={taxed ? "Value Before Tax" : "Value of Goods"}
+            subtotalPaise={challan.totalValuePaise}
+            showTax={taxed}
+            taxPaise={taxPaise}
+            singleRateBp={singleRateBp}
+            roundOffPaise={challan.roundOffPaise}
+            totalLabel={taxed ? "Total Value incl. GST (₹)" : "Value of Consignment (₹)"}
+            totalPaise={challan.totalPaise}
+          />
         </section>
+
+        <p className="mt-4 text-xs text-paper-muted">
+          This is a delivery challan, not a tax invoice.{" "}
+          {taxed
+            ? "The GST above is shown as GST rules require for goods moving for supply; it is charged on the invoice raised against this delivery."
+            : "GST, where it applies, is charged on the invoice raised against this delivery."}
+        </p>
 
         {challan.notes && (
           <p className="mt-6 whitespace-pre-line border-t border-paper-border pt-4 text-xs text-paper-muted">

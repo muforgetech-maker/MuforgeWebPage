@@ -9,6 +9,7 @@ import { clientOptions } from "@/lib/erp/data/clients";
 import { getSettings } from "@/lib/erp/data/settings";
 import { todayIST } from "@/lib/erp/dates";
 import { ChallanEditor } from "../challan-editor";
+import { challanEditorSettings } from "../editor-settings";
 
 // Renders per request behind the login; see the ERP layout.
 export const instant = false;
@@ -44,7 +45,7 @@ export default async function NewChallanPage({ searchParams }: PageProps<"/admin
           action={saveChallan.bind(null, null)}
           clients={clients}
           reasons={challanReasons}
-          defaultSac={settings.defaultSac}
+          settings={challanEditorSettings(settings)}
           mode="create"
           cancelHref="/admin/challans"
           initial={{
@@ -58,7 +59,14 @@ export default async function NewChallanPage({ searchParams }: PageProps<"/admin
             notes: "",
             terms: "",
             lines: [
-              { description: "", sac: settings.defaultSac, quantity: "1", unit: "nos", rate: "" },
+              {
+                description: "",
+                sac: settings.defaultSac,
+                quantity: "1",
+                unit: "nos",
+                rate: "",
+                taxRateBp: String(settings.gstRegistered ? settings.defaultTaxRateBp : 0),
+              },
             ],
           }}
         />

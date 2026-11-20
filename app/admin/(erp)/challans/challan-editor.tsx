@@ -6,9 +6,9 @@ import { LoaderCircle, Plus, Send, Trash2, UserPlus } from "lucide-react";
 import { FormMessage, SelectField, TextAreaField, TextField } from "@/components/erp/fields";
 import { useActionForm } from "@/components/erp/use-action-form";
 import type { ActionState } from "@/lib/erp/form";
-import { indianStates, sacSuggestions, stateName } from "@/lib/erp/gst";
-import { lineAmount } from "@/lib/erp/invoice-calc";
-import { formatINR, parseQuantityToMilli, parseRupeesToPaise } from "@/lib/erp/money";
+import { formatRateBp, gstRatesBp, indianStates, sacSuggestions, stateName } from "@/lib/erp/gst";
+import { computeInvoiceTotals, taxModeFor } from "@/lib/erp/invoice-calc";
+import { amountInWords, formatINR, parseQuantityToMilli, parseRupeesToPaise } from "@/lib/erp/money";
 
 export type ChallanEditorLine = {
   description: string;
@@ -16,6 +16,7 @@ export type ChallanEditorLine = {
   quantity: string;
   unit: string;
   rate: string;
+  taxRateBp: string;
 };
 
 export type ChallanEditorInitial = {
@@ -31,6 +32,15 @@ export type ChallanEditorInitial = {
   lines: ChallanEditorLine[];
 };
 
+/** The settings the editor needs to preview the tax exactly as the server will store it. */
+export type ChallanEditorSettings = {
+  gstRegistered: boolean;
+  stateCode: string;
+  roundOff: boolean;
+  defaultSac: string;
+  defaultTaxRateBp: number;
+};
+
 type ClientOption = { id: number; name: string; stateCode: string; gstin: string };
 
 const unitSuggestions = ["nos", "pcs", "sets", "boxes", "kg", "metres", "hrs"];
@@ -39,7 +49,7 @@ export function ChallanEditor({
   action,
   clients,
   reasons,
-  defaultSac,
+  settings,
   initial,
   mode,
   cancelHref,
@@ -47,7 +57,7 @@ export function ChallanEditor({
   action: (state: ActionState, formData: FormData) => Promise<ActionState>;
   clients: ClientOption[];
   reasons: readonly string[];
-  defaultSac: string;
+  settings: ChallanEditorSettings;
   initial: ChallanEditorInitial;
   mode: "create" | "draft" | "issued";
   cancelHref: string;
@@ -62,10 +72,11 @@ export function ChallanEditor({
   const blankLine = (): ChallanEditorLine & { key: string } => ({
     key: crypto.randomUUID(),
     description: "",
-    sac: defaultSac,
+    sac: settings.defaultSac,
     quantity: "1",
     unit: "nos",
     rate: "",
+    taxRateBp: String(settings.gstRegistered ? settings.defaultTaxRateBp : 0),
   });
 
   const updateLine = (key: string, field: keyof ChallanEditorLine, value: string) =>
@@ -79,12 +90,32 @@ export function ChallanEditor({
     if (client) setPlaceOfSupply(client.stateCode);
   };
 
-  const amounts = lines.map((line) =>
-    lineAmount(parseQuantityToMilli(line.quantity) ?? 0, parseRupeesToPaise(line.rate) ?? 0),
+  // The same arithmetic the server stores, so what is shown here is what prints.
+  const taxMode = taxModeFor(settings.gstRegistered, settings.stateCode, placeOfSupply);
+  const totals = computeInvoiceTotals(
+    lines.map((line) => ({
+      description: line.description,
+      sac: line.sac,
+      unit: line.unit,
+      quantityMilli: parseQuantityToMilli(line.quantity) ?? 0,
+      ratePaise: parseRupeesToPaise(line.rate) ?? 0,
+      taxRateBp: Number(line.taxRateBp) || 0,
+    })),
+    taxMode,
+    settings.roundOff,
   );
-  const totalValuePaise = amounts.reduce((sum, paise) => sum + paise, 0);
   const selectedClient = clients.find((c) => String(c.id) === clientId);
-  const lineGrid = "md:grid-cols-[minmax(0,1fr)_6.5rem_5rem_5.5rem_7.5rem_7.5rem_2.25rem]";
+  const showGst = settings.gstRegistered;
+  const lineGrid = showGst
+    ? "md:grid-cols-[minmax(0,1fr)_6.5rem_5rem_5.5rem_7.5rem_5.5rem_7.5rem_2.25rem]"
+    : "md:grid-cols-[minmax(0,1fr)_6.5rem_5rem_5.5rem_7.5rem_7.5rem_2.25rem]";
+
+  const taxNote =
+    taxMode === "none"
+      ? "Not GST registered, so the challan shows no tax."
+      : taxMode === "intra"
+        ? `Delivery within ${stateName(settings.stateCode)}: tax shown as CGST + SGST.`
+        : `Delivery to ${stateName(placeOfSupply)}: tax shown as IGST.`;
 
   return (
     <form {...formProps} className="grid gap-5">
@@ -93,12 +124,13 @@ export function ChallanEditor({
         type="hidden"
         name="lines"
         value={JSON.stringify(
-          lines.map(({ description, sac, quantity, unit, rate }) => ({
+          lines.map(({ description, sac, quantity, unit, rate, taxRateBp }) => ({
             description,
             sac,
             quantity,
             unit,
             rate,
+            taxRateBp,
           })),
         )}
       />
@@ -164,6 +196,7 @@ export function ChallanEditor({
           value={placeOfSupply}
           onChange={(event) => setPlaceOfSupply(event.target.value)}
           error={errorFor("placeOfSupply")}
+          hint={taxNote}
         >
           {indianStates.map((state) => (
             <option key={state.code} value={state.code}>
@@ -204,10 +237,14 @@ export function ChallanEditor({
 
       {/* Items */}
       <section className="erp-card p-5 sm:p-6">
-        <h2 className="text-base font-semibold text-text">Items</h2>
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-base font-semibold text-text">Items</h2>
+          {showGst && <span className="text-xs text-text-muted">Rates exclude GST</span>}
+        </div>
         <p className="erp-hint mt-1">
-          A challan states a value for the consignment but charges no tax. GST is applied on the
-          invoice raised afterwards.
+          {showGst
+            ? "The challan shows the GST on each rate, as GST rules ask when goods move for supply. It is charged on the invoice raised afterwards. Use 0% for job work or goods sent on approval."
+            : "The challan states the value of the consignment."}
         </p>
         {errorFor("lines") && (
           <p className="erp-error" role="alert">
@@ -223,6 +260,7 @@ export function ChallanEditor({
           <span className="text-right">Qty</span>
           <span>Unit</span>
           <span className="text-right">Rate (₹)</span>
+          {showGst && <span>GST</span>}
           <span className="text-right">Value</span>
           <span />
         </div>
@@ -230,7 +268,9 @@ export function ChallanEditor({
         <ol className="mt-3 grid gap-4 md:gap-2">
           {lines.map((line, index) => {
             const err = (field: string) => errorFor(`lines.${index}.${field}`);
-            const lineErrors = ["description", "sac", "quantity", "rate"].map(err).filter(Boolean);
+            const lineErrors = ["description", "sac", "quantity", "rate", "taxRateBp"]
+              .map(err)
+              .filter(Boolean);
             const n = index + 1;
             const labelClass = "mb-1 block text-xs font-medium text-text-muted md:sr-only";
             return (
@@ -305,10 +345,30 @@ export function ChallanEditor({
                       className="erp-control text-right font-mono"
                     />
                   </div>
+                  {showGst && (
+                    <div>
+                      <label htmlFor={`${line.key}-tax`} className={labelClass}>
+                        Item {n} GST rate
+                      </label>
+                      <select
+                        id={`${line.key}-tax`}
+                        value={line.taxRateBp}
+                        onChange={(e) => updateLine(line.key, "taxRateBp", e.target.value)}
+                        aria-invalid={err("taxRateBp") ? true : undefined}
+                        className="erp-control px-2"
+                      >
+                        {gstRatesBp.map((bp) => (
+                          <option key={bp} value={bp}>
+                            {formatRateBp(bp)}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                   <div className="flex items-center justify-between md:block md:pt-2 md:text-right">
                     <span className="text-xs text-text-muted md:sr-only">Value</span>
                     <span className="font-mono text-sm tabular-nums text-text">
-                      {formatINR(amounts[index] ?? 0)}
+                      {formatINR(totals.lines[index]?.amountPaise ?? 0)}
                     </span>
                   </div>
                   <div className="flex justify-end md:block">
@@ -334,21 +394,15 @@ export function ChallanEditor({
           })}
         </ol>
 
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
-          <button
-            type="button"
-            onClick={() => setLines((current) => [...current, blankLine()])}
-            disabled={lines.length >= 100}
-            className="erp-button-secondary"
-          >
-            <Plus size={16} aria-hidden="true" />
-            Add item
-          </button>
-          <p className="text-sm text-text-muted">
-            Total value{" "}
-            <span className="font-mono tabular-nums text-text">{formatINR(totalValuePaise)}</span>
-          </p>
-        </div>
+        <button
+          type="button"
+          onClick={() => setLines((current) => [...current, blankLine()])}
+          disabled={lines.length >= 100}
+          className="erp-button-secondary mt-4"
+        >
+          <Plus size={16} aria-hidden="true" />
+          Add item
+        </button>
 
         <datalist id="sac-options">
           {sacSuggestions.map((s) => (
@@ -362,6 +416,31 @@ export function ChallanEditor({
             <option key={u} value={u} />
           ))}
         </datalist>
+
+        {/* Totals: the same breakdown the printed challan shows */}
+        <div className="mt-6 flex justify-end border-t border-border pt-4">
+          <dl className="grid w-full max-w-sm gap-1.5 text-sm" aria-live="polite">
+            <TotalRow label={showGst ? "Taxable value" : "Value"} paise={totals.subtotalPaise} />
+            {totals.taxGroups
+              .filter((g) => g.rateBp > 0)
+              .flatMap((g) =>
+                taxMode === "intra"
+                  ? [
+                      <TotalRow key={`c${g.rateBp}`} label={`CGST @ ${formatRateBp(g.rateBp / 2)}`} paise={g.cgstPaise} />,
+                      <TotalRow key={`s${g.rateBp}`} label={`SGST @ ${formatRateBp(g.rateBp / 2)}`} paise={g.sgstPaise} />,
+                    ]
+                  : [<TotalRow key={`i${g.rateBp}`} label={`IGST @ ${formatRateBp(g.rateBp)}`} paise={g.igstPaise} />],
+              )}
+            {totals.roundOffPaise !== 0 && <TotalRow label="Round off" paise={totals.roundOffPaise} signed />}
+            <div className="mt-1 flex items-baseline justify-between border-t border-border pt-2">
+              <dt className="font-semibold text-text">Total value</dt>
+              <dd className="font-mono text-lg font-semibold tabular-nums text-text">
+                {formatINR(totals.totalPaise)}
+              </dd>
+            </div>
+            <p className="text-right text-xs text-text-muted">{amountInWords(totals.totalPaise)}</p>
+          </dl>
+        </div>
       </section>
 
       <section className="erp-card grid gap-4 p-5 sm:p-6 md:grid-cols-2">
@@ -417,5 +496,17 @@ export function ChallanEditor({
         )}
       </div>
     </form>
+  );
+}
+
+function TotalRow({ label, paise, signed }: { label: string; paise: number; signed?: boolean }) {
+  return (
+    <div className="flex items-baseline justify-between gap-4">
+      <dt className="text-text-muted">{label}</dt>
+      <dd className="font-mono tabular-nums text-text">
+        {signed && paise > 0 ? "+" : ""}
+        {formatINR(paise)}
+      </dd>
+    </div>
   );
 }
